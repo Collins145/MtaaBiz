@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Businesses near you | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body class="mtaabiz-info-page">
+  {% include "partials/page_header.html" %}
+  <main class="container nearby-page">
+    <span class="business-detail-kicker">LOCAL DISCOVERY</span>
+    <h1>Businesses near you</h1>
+    <p>Share your location only for this search. Your coordinates are not saved to your account.</p>
+    <form class="nearby-search-form" method="get" action="{% url 'nearby_businesses' %}" id="nearby-search-form">
+      <input type="hidden" name="lat" id="nearby-lat" value="{{ latitude }}">
+      <input type="hidden" name="lng" id="nearby-lng" value="{{ longitude }}">
+      <label for="nearby-radius">Search radius</label>
+      <select class="form-select" name="radius" id="nearby-radius">
+        <option value="5"{% if radius == 5 %} selected{% endif %}>5 km</option>
+        <option value="10"{% if radius == 10 %} selected{% endif %}>10 km</option>
+        <option value="25"{% if radius == 25 or not radius %} selected{% endif %}>25 km</option>
+        <option value="50"{% if radius == 50 %} selected{% endif %}>50 km</option>
+        <option value="100"{% if radius == 100 %} selected{% endif %}>100 km</option>
+      </select>
+      <button class="owner-primary-button" type="button" id="nearby-locate"><i class="bi bi-crosshair"></i> Use my location</button>
+      <p class="nearby-error" id="nearby-client-error" role="status"></p>
+    </form>
+    {% if error %}<p class="alert alert-warning" role="alert">{{ error }}</p>{% endif %}
+    {% if has_location %}
+      <section class="business-results" aria-live="polite">
+        <h2>Within {{ radius }} km</h2>
+        <p>{{ businesses|length }} result{{ businesses|length|pluralize }}</p>
+        <div class="row g-3">
+          {% for business in businesses %}
+            {% include "partials/business_card.html" with business=business %}
+          {% empty %}
+            <div class="col-12"><p class="home-empty-state">No businesses with mapped coordinates were found in this radius. Try a wider search or browse the full directory.</p></div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+    <a class="owner-secondary-button" href="{% url 'businesses' %}">Browse the full directory</a>
+  </main>
+  {% include "home_footer.html" %}
+  <script>
+    document.getElementById("nearby-locate").addEventListener("click", function () {
+      var error = document.getElementById("nearby-client-error");
+      if (!navigator.geolocation) {
+        error.textContent = "Location sharing is not available in this browser. You can browse the directory by town instead.";
+        return;
+      }
+      error.textContent = "Requesting your location…";
+      navigator.geolocation.getCurrentPosition(function (position) {
+        document.getElementById("nearby-lat").value = position.coords.latitude;
+        document.getElementById("nearby-lng").value = position.coords.longitude;
+        document.getElementById("nearby-search-form").submit();
+      }, function () {
+        error.textContent = "Location permission was not granted. You can browse the directory by town instead.";
+      }, {enableHighAccuracy: false, timeout: 10000, maximumAge: 300000});
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<section id="testimonials" class="testimonials section">
+  <div class="container section-title">
+    <h2>Testimonials</h2>
+    <p>Hear from people who support and grow with local businesses.</p>
+  </div>
+  <div class="container">
+    <div class="row g-3">
+      {% for testimonial in testimonials %}
+        <div class="col-md-6 col-lg-4">
+          <article class="testimonial-item home-testimonial">
+            {% if testimonial.photo_url %}
+              <img src="{{ testimonial.photo_url }}" class="testimonial-img" alt="{{ testimonial.name }}">
+            {% endif %}
+            <h3>{{ testimonial.name }}</h3>
+            {% if testimonial.role %}<h4>{{ testimonial.role }}</h4>{% endif %}
+            <p class="home-testimonial-rating" aria-label="{{ testimonial.rating }} out of 5 stars">
+              {% for _ in "12345" %}
+                {% if forloop.counter <= testimonial.rating %}<i class="bi bi-star-fill"></i>{% endif %}
+              {% endfor %}
+            </p>
+            <blockquote>{{ testimonial.quote }}</blockquote>
+          </article>
+        </div>
+      {% empty %}
+        <div class="col-12">
+          <p class="home-empty-state">Customer stories will appear here as testimonials are approved.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>

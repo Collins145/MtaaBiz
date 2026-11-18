@@ -1,0 +1,69 @@
+{% load static %}
+<div class="{% if directory_view %}col-md-6 col-lg-4{% else %}col-6 col-md-3{% endif %}">
+  <article class="business-card{% if show_full_details %} business-card-detailed{% endif %}{% if featured_card %} business-card-featured{% endif %}">
+    <div class="business-card-photo">
+      {% if business.cover_image_url %}
+        <img src="{{ business.cover_image_url }}" alt="{{ business.name }} cover photo" loading="lazy">
+      {% elif business.image_url %}
+        <img src="{{ business.image_url }}" alt="{{ business.name }} photo" loading="lazy">
+      {% else %}
+        <img src="{% static 'assets/img/portfolio/portfolio-1.webp' %}" alt="" loading="lazy">
+      {% endif %}
+      {% if business.logo_url %}
+        <img class="business-card-logo" src="{{ business.logo_url }}" alt="{{ business.name }} logo" loading="lazy">
+      {% endif %}
+      {% if business.is_verified %}
+        <span class="business-verified"><i class="bi bi-patch-check-fill"></i> Verified</span>
+      {% endif %}
+      {% if business.is_sponsored %}
+        <span class="business-sponsored"><i class="bi bi-megaphone-fill"></i> Sponsored</span>
+      {% endif %}
+    </div>
+    <div class="business-card-info">
+      <h3><a href="{% url 'business_detail' business.pk %}">{{ business.name }}</a></h3>
+      {% if business.rating %}
+        <p class="business-rating"><i class="bi bi-star-fill"></i> <strong>{{ business.rating }}</strong>{% if business.review_count %} ({{ business.review_count }} reviews){% endif %}</p>
+      {% elif show_full_details %}
+        <p class="business-rating business-rating-unrated">Not rated yet</p>
+      {% endif %}
+      {% if business.category %}<p class="business-category">{{ business.category.name }}</p>{% endif %}
+      <p class="business-location"><i class="bi bi-geo-alt-fill"></i> {{ business.formatted_location }}</p>
+      {% if business.distance_km != None %}<p class="business-distance"><i class="bi bi-pin-map"></i> {{ business.distance_km|floatformat:1 }} km away</p>{% endif %}
+      {% if business.phone %}
+        <a class="business-phone" href="{% url 'track_business_contact' business.pk 'phone' %}"><i class="bi bi-telephone-fill"></i> {{ business.phone }}</a>
+      {% endif %}
+      {% if show_full_details and business.contact_name %}
+        <p class="business-contact"><i class="bi bi-person-fill"></i> {{ business.contact_name }}</p>
+      {% endif %}
+      {% if show_full_details and business.email %}
+        <a class="business-email" href="{% url 'track_business_contact' business.pk 'email' %}"><i class="bi bi-envelope-fill"></i> {{ business.email }}</a>
+      {% endif %}
+      {% if business.description %}
+        <p class="business-description">{% if show_full_details %}{{ business.description }}{% else %}{{ business.description|truncatewords:18 }}{% endif %}</p>
+      {% endif %}
+      {% if show_full_details and business.offerings %}
+        <div class="business-offerings">
+          <strong>Products &amp; services</strong>
+          <p>{{ business.offerings }}</p>
+        </div>
+      {% endif %}
+      {% if show_full_details and business.opening_hours %}
+        <p class="business-opening-hours"><i class="bi bi-clock"></i> {{ business.opening_hours|linebreaksbr }}</p>
+      {% endif %}
+      {% if show_full_details and business.website_url %}
+        <p class="business-website"><i class="bi bi-globe"></i> <a href="{% url 'track_business_contact' business.pk 'website' %}">Visit website</a></p>
+      {% endif %}
+      {% if show_full_details %}
+        <div class="business-social-links" aria-label="Business social media">
+          {% if business.phone %}<a href="{% url 'track_business_contact' business.pk 'whatsapp' %}" aria-label="Message {{ business.name }} on WhatsApp"><i class="bi bi-whatsapp"></i></a>{% endif %}
+          {% if business.facebook_url %}<a href="{{ business.facebook_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ business.name }} on Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
+          {% if business.instagram_url %}<a href="{{ business.instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ business.name }} on Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
+          {% if business.tiktok_url %}<a href="{{ business.tiktok_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ business.name }} on TikTok"><i class="bi bi-tiktok"></i></a>{% endif %}
+          {% if business.x_url %}<a href="{{ business.x_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ business.name }} on X"><i class="bi bi-twitter-x"></i></a>{% endif %}
+          {% if business.linkedin_url %}<a href="{{ business.linkedin_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ business.name }} on LinkedIn"><i class="bi bi-linkedin"></i></a>{% endif %}
+        </div>
+      {% endif %}
+      <a class="business-profile-link" href="{% url 'business_detail' business.pk %}">View business profile <i class="bi bi-arrow-right"></i></a>
+    </div>
+  </article>
+</div>

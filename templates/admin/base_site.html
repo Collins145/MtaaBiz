@@ -1,0 +1,10 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} | MtaaBiz administration{% endblock %}
+{% block branding %}
+  <div id="site-name">
+    <a href="{% url 'admin:index' %}">MtaaBiz administration</a>
+    <a href="{% url 'admin_reports' %}" style="margin-left: 1.5rem;">Platform reports</a>
+  </div>
+{% endblock %}

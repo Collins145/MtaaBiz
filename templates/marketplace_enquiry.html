@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact {{ listing.business.name }} | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body>
+  <main class="container marketplace-enquiry-page py-5">
+    <a href="{% url 'marketplace' %}#listing-{{ listing.pk }}" class="business-back-link"><i class="bi bi-arrow-left"></i> Back to marketplace</a>
+    <div class="marketplace-enquiry-layout">
+      <section class="marketplace-enquiry-listing">
+        <span>{{ listing.get_listing_type_display }}{% if listing.category %} · {{ listing.category.name }}{% endif %}</span>
+        <h1>{{ listing.name }}</h1>
+        {% if listing.image_url %}<img src="{{ listing.image_url }}" alt="{{ listing.name }}">{% endif %}
+        <p>{{ listing.description }}</p>
+        <h2>{{ listing.business.name }}</h2>
+        {% if listing.business.contact_name %}<p>Seller: {{ listing.business.contact_name }}</p>{% endif %}
+        <p><i class="bi bi-geo-alt"></i> {{ listing.business.formatted_location }}</p>
+        {% if listing.business.phone %}<p><a href="tel:{{ listing.business.phone }}">{{ listing.business.phone }}</a></p>{% endif %}
+        {% if listing.price != None %}
+          <p class="marketplace-price">{% if listing.listing_type == 'service' %}From {% endif %}KSh {{ listing.price|floatformat:2 }}</p>
+        {% else %}
+          <p class="marketplace-price">Price by quote</p>
+        {% endif %}
+      </section>
+      <section class="marketplace-enquiry-form">
+        <h2>Contact the seller</h2>
+        <p>Send your request directly to {{ listing.business.name }}. This does not take payment or confirm an order.</p>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+          {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+          <button type="submit" class="btn btn-primary">Send request</button>
+        </form>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

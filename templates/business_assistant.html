@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business finder | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body class="mtaabiz-info-page">
+  {% include "partials/page_header.html" %}
+  <main class="container assistant-page" data-search-url="{% url 'business_assistant' %}">
+    <span class="business-detail-kicker"><i class="bi bi-stars"></i> MTAABIZ BUSINESS FINDER</span>
+    <h1>What are you looking for?</h1>
+    <p>Describe a product, service, category, or town. MtaaBiz searches published local listings and ranks relevant matches. Your search stays on this site.</p>
+    <form class="assistant-search-form" method="get" action="{% url 'business_assistant' %}">
+      <label class="visually-hidden" for="assistant-query">Describe what you need</label>
+      <input class="form-control" id="assistant-query" name="q" value="{{ query }}" maxlength="500" placeholder="e.g. affordable printing in Bondo" required>
+      <button class="owner-primary-button" type="submit"><i class="bi bi-search"></i> Find businesses</button>
+    </form>
+    {% if query_error %}<p class="assistant-history-error" role="alert">{{ query_error }}</p>{% endif %}
+    {% if searched %}
+      <section class="assistant-results" id="assistant-results" data-assistant-results aria-live="polite">
+        <h2>Suggestions for “{{ query }}”</h2>
+        <p>Ranked from MtaaBiz business descriptions, products, services, categories, and locations.</p>
+        {% for business in businesses %}
+          <article class="assistant-result-card" data-assistant-result>
+            <div><h3><a data-assistant-business-link href="{% url 'business_detail' business.pk %}">{{ business.name }}</a></h3><p>{% if business.category %}{{ business.category.name }} · {% endif %}{{ business.formatted_location }}</p><p>{{ business.description|truncatewords:24 }}</p></div>
+            <a class="owner-secondary-button" href="{% url 'business_detail' business.pk %}">View profile</a>
+          </article>
+        {% empty %}
+          <p class="home-empty-state">No matching published businesses were found. Try a broader search or browse the directory.</p>
+        {% endfor %}
+      </section>
+    {% endif %}
+    {% if user.is_authenticated %}
+      <section class="assistant-history" id="assistant-history" aria-labelledby="assistant-history-heading">
+        <div class="assistant-history-heading">
+          <div>
+            <h2 id="assistant-history-heading">Your saved searches</h2>
+            <p>Saved privately to your MtaaBiz account. All searches are kept, with the newest first.</p>
+          </div>
+          {% if history_entries %}
+            <form method="post" action="{% url 'business_assistant_history_clear' %}" onsubmit="return confirm('Clear all your saved Business Finder searches?');">
+              {% csrf_token %}
+              <button class="assistant-history-text-button" type="submit">Clear all</button>
+            </form>
+          {% endif %}
+        </div>
+        {% for saved_search in history_entries %}
+          <article class="assistant-history-card">
+            <div class="assistant-history-query">
+              <div><a href="{% url 'business_assistant' %}?q={{ saved_search.query|urlencode }}#assistant-results">{{ saved_search.query }}</a><small>{{ saved_search.created_at|date:"M j, Y, g:i a" }}</small></div>
+              <form method="post" action="{% url 'business_assistant_history_delete' saved_search.pk %}">
+                {% csrf_token %}
+                <button class="assistant-history-text-button" type="submit">Remove</button>
+              </form>
+            </div>
+            {% if saved_search.saved_businesses %}
+              <ul>
+                {% for business in saved_search.saved_businesses %}
+                  <li><a href="{% url 'business_detail' business.pk %}">{{ business.name }}</a></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="assistant-history-no-results">No matching published businesses were saved for this search.</p>
+            {% endif %}
+          </article>
+        {% empty %}
+          <p class="assistant-history-empty">Your saved searches will appear here after you search.</p>
+        {% endfor %}
+        {% if history_page_obj.has_other_pages %}
+          <nav class="assistant-history-pagination" aria-label="Saved search pages">
+            {% if history_page_obj.has_previous %}<a href="?history_page={{ history_page_obj.previous_page_number }}#assistant-history"><i class="bi bi-arrow-left"></i> Newer</a>{% endif %}
+            <span>Page {{ history_page_obj.number }} of {{ history_page_obj.paginator.num_pages }}</span>
+            {% if history_page_obj.has_next %}<a href="?history_page={{ history_page_obj.next_page_number }}#assistant-history">Older searches <i class="bi bi-arrow-right"></i></a>{% endif %}
+          </nav>
+        {% endif %}
+      </section>
+    {% else %}
+      <section class="assistant-history" id="assistant-history" data-browser-history aria-labelledby="assistant-history-heading">
+        <div class="assistant-history-heading">
+          <div>
+            <h2 id="assistant-history-heading">Recent searches on this browser</h2>
+            <p>Guest searches stay in this browser only and are not sent to your MtaaBiz account.</p>
+          </div>
+          <button class="assistant-history-text-button" type="button" data-browser-history-clear hidden>Clear history</button>
+        </div>
+        <p class="assistant-history-empty" data-browser-history-status aria-live="polite">Your recent searches will appear here.</p>
+        <div class="assistant-history-list" data-browser-history-list></div>
+        <button class="assistant-history-more" type="button" data-browser-history-more hidden>Show older searches</button>
+      </section>
+    {% endif %}
+    <a class="owner-secondary-button" href="{% url 'nearby_businesses' %}"><i class="bi bi-geo-alt"></i> Discover businesses near me</a>
+  </main>
+  {% include "home_footer.html" %}
+  <script src="{% static 'assets/js/business-assistant-history.js' %}" defer></script>
+</body>
+</html>

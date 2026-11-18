@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ article.title }} | MtaaBiz</title>
+  <meta name="description" content="{{ article.summary }}">
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body class="mtaabiz-info-page">
+  {% include "partials/page_header.html" %}
+  <main class="container article-detail-page">
+    <a class="business-back-link" href="{% if article.content_type == 'resource' %}{% url 'business_hub' %}{% else %}{% url 'blog' %}{% endif %}"><i class="bi bi-arrow-left"></i> {% if article.content_type == 'resource' %}Business Hub{% else %}Blog{% endif %}</a>
+    <article>
+      <span class="business-detail-kicker">{% if article.content_type == 'resource' %}BUSINESS HUB GUIDE{% else %}MTAABIZ JOURNAL{% endif %}</span>
+      <h1>{{ article.title }}</h1>
+      <p class="article-detail-meta">{% if article.author %}{{ article.author }} · {% endif %}{{ article.published_at|date:"M j, Y" }}</p>
+      {% if article.image_url %}<img class="article-detail-image" src="{{ article.image_url }}" alt="" loading="lazy">{% endif %}
+      <p class="article-detail-summary">{{ article.summary }}</p>
+      <div class="article-detail-body">{{ article.body|linebreaks }}</div>
+    </article>
+  </main>
+  {% include "home_footer.html" %}
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Inbox | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
+</head>
+<body class="contacts-dashboard">
+  <div class="contacts-dashboard-layout">
+    {% include "partials/contact_dashboard_sidebar.html" with active_page="inbox" %}
+
+    <main class="contacts-dashboard-main">
+      <header class="contacts-dashboard-topbar">
+        <div>
+          <p>MTAABIZ / MESSAGES</p>
+          <h1>Contact inbox</h1>
+        </div>
+        <a class="contacts-view-site" href="{% url 'index' %}"><i class="bi bi-box-arrow-up-right"></i> View website</a>
+      </header>
+
+      <section class="contacts-welcome">
+        <div>
+          <span>MESSAGE CENTER</span>
+          <h2>Every conversation, in one place.</h2>
+          <p>Review questions and feedback sent through the MtaaBiz contact form.</p>
+        </div>
+        <div class="contacts-welcome-art" aria-hidden="true">
+          <i class="bi bi-chat-square-text-fill"></i>
+          <span class="contacts-welcome-spark spark-one"><i class="bi bi-plus-lg"></i></span>
+          <span class="contacts-welcome-spark spark-two"><i class="bi bi-circle-fill"></i></span>
+        </div>
+      </section>
+
+      {% with latest_contact=all.0 %}
+        <section class="contacts-summary-grid" aria-label="Inbox summary">
+          <article class="contacts-summary-card">
+            <span class="contacts-summary-icon summary-orange"><i class="bi bi-envelope-paper"></i></span>
+            <div>
+              <p>Total messages</p>
+              <strong>{{ all|length }}</strong>
+            </div>
+            <span class="contacts-summary-caption">saved submissions</span>
+          </article>
+          <article class="contacts-summary-card">
+            <span class="contacts-summary-icon summary-blue"><i class="bi bi-chat-left-text"></i></span>
+            <div>
+              <p>Latest subject</p>
+              <strong class="contacts-latest-subject">{% if latest_contact %}{{ latest_contact.subject|truncatechars:28 }}{% else %}No messages yet{% endif %}</strong>
+            </div>
+            <span class="contacts-summary-caption">{% if latest_contact %}from {{ latest_contact.name }}{% else %}New messages appear here{% endif %}</span>
+          </article>
+          <a class="contacts-summary-card contacts-public-form-card" href="{% url 'contact' %}">
+            <span class="contacts-summary-icon summary-green"><i class="bi bi-arrow-up-right"></i></span>
+            <div>
+              <p>Public contact form</p>
+              <strong>Open form</strong>
+            </div>
+            <span class="contacts-summary-caption">See what visitors see</span>
+          </a>
+        </section>
+      {% endwith %}
+
+      <section class="contacts-table-panel" aria-labelledby="messages-heading">
+        <div class="contacts-panel-heading">
+          <div>
+            <h2 id="messages-heading">Recent messages</h2>
+            <p><span id="visible-message-count">{{ all|length }}</span> message{{ all|length|pluralize }} in your inbox</p>
+          </div>
+          <label class="contacts-search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <span class="visually-hidden">Search messages</span>
+            <input id="contact-search" type="search" placeholder="Search messages..." autocomplete="off">
+          </label>
+        </div>
+
+        <div class="contacts-table-scroll">
+          <table class="contacts-table">
+            <thead>
+              <tr>
+                <th scope="col">Sender</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Message</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="contact-table-body">
+              {% for contact in all %}
+                <tr data-contact-row data-contact-id="{{ contact.id }}">
+                  <td>
+                    <div class="contacts-sender">
+                      <span class="contacts-avatar">{{ contact.name|first|upper }}</span>
+                      <span><strong>{{ contact.name }}</strong><small>{{ contact.email }}</small></span>
+                    </div>
+                  </td>
+                  <td><span class="contacts-subject">{{ contact.subject }}</span></td>
+                  <td><p class="contacts-message-preview">{{ contact.message|truncatechars:115 }}</p></td>
+                  <td>
+                    <div class="contacts-row-actions">
+                      <a href="{% url 'edit' contact.id %}" class="contacts-action-edit" aria-label="Edit message from {{ contact.name }}" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                      <a href="{% url 'delete' contact.id %}" class="contacts-action-delete" aria-label="Delete message from {{ contact.name }}" title="Delete" onclick="return confirm('Delete this contact message?');"><i class="bi bi-trash3"></i></a>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr class="contacts-empty-row">
+                  <td colspan="4">
+                    <div class="contacts-empty-state">
+                      <span><i class="bi bi-inbox"></i></span>
+                      <h3>Your inbox is clear</h3>
+                      <p>Messages submitted through the contact page will appear here.</p>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p id="contacts-search-empty" class="contacts-search-empty" hidden>No messages match your search.</p>
+      </section>
+
+      <footer class="contacts-dashboard-footer">
+        <span>© {% now "Y" %} MtaaBiz</span>
+        <a href="{% url 'contact' %}">Contact support</a>
+      </footer>
+    </main>
+  </div>
+
+  <script src="{% static 'assets/js/contact-dashboard.js' %}" defer></script>
+</body>
+</html>

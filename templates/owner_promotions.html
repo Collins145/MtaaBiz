@@ -1,0 +1,48 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Promotions{% endblock %}
+{% block heading %}Promotions & offers{% endblock %}
+
+{% block dashboard_content %}
+  {% include "partials/owner_business_subnav.html" with active_tab="promotions" %}
+  <div class="owner-management-grid">
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>Create a promotion</h2><p>Submitted offers are reviewed before they go live.</p></div></div>
+      <form method="post" class="owner-form owner-form-single">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="owner-form-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<small class="owner-field-error">{{ error }}</small>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="owner-primary-button" type="submit"><i class="bi bi-plus-lg"></i> Save promotion</button>
+      </form>
+    </section>
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>{{ business.name }} promotions</h2><p>{{ promotions|length }} offers</p></div></div>
+      <div class="owner-record-list">
+        {% for promotion in promotions %}
+          <article class="owner-record">
+            <span class="owner-record-icon owner-record-icon-orange"><i class="bi bi-megaphone"></i></span>
+            <div class="owner-record-content">
+              <strong>{{ promotion.title }}</strong>
+              <small>{{ promotion.starts_on|default:"Any start date" }} – {{ promotion.ends_on|default:"No end date" }}</small>
+              <small>{% if promotion.is_published %}Published{% else %}Awaiting review{% endif %}</small>
+            </div>
+            <div class="owner-record-actions">
+              <a href="{% url 'owner_promotion_edit' promotion.pk %}" aria-label="Edit {{ promotion.title }}"><i class="bi bi-pencil-square"></i></a>
+              <form method="post" action="{% url 'owner_promotion_delete' promotion.pk %}" onsubmit="return confirm('Remove this promotion?');">
+                {% csrf_token %}
+                <button type="submit" aria-label="Remove {{ promotion.title }}"><i class="bi bi-trash3"></i></button>
+              </form>
+            </div>
+          </article>
+        {% empty %}
+          <p class="owner-list-empty">No promotions yet. Share a limited-time offer with local customers.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

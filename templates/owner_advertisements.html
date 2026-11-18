@@ -1,0 +1,39 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Advertisements{% endblock %}
+{% block heading %}Advertisements{% endblock %}
+
+{% block dashboard_content %}
+  {% include "partials/owner_business_subnav.html" with active_tab="advertisements" %}
+  <div class="owner-management-grid">
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>Request a campaign</h2><p>The MtaaBiz team reviews placement, schedule, and pricing before activation.</p></div></div>
+      <form method="post" class="owner-form owner-form-single">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="owner-form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="owner-field-error">{{ error }}</small>{% endfor %}</div>
+        {% endfor %}
+        <button class="owner-primary-button" type="submit">Submit campaign request</button>
+      </form>
+      <p class="owner-pricing-note">No advertising is shown until MtaaBiz approves the campaign and confirms any manual payment.</p>
+    </section>
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>{{ business.name }} campaigns</h2><p>Campaigns and manual payment status.</p></div></div>
+      <div class="owner-record-list">
+        {% for campaign in campaigns %}
+          <article class="owner-record"><span class="owner-record-icon"><i class="bi bi-megaphone"></i></span><div class="owner-record-content"><strong>{{ campaign.title }}</strong><small>{{ campaign.get_placement_display }} · {{ campaign.get_status_display }}</small><small>{% if campaign.amount_due != None %}Amount due: KSh {{ campaign.amount_due|floatformat:2 }}{% else %}Amount to be confirmed{% endif %}</small>
+            {% for payment in campaign.payments.all %}<small>Payment {{ payment.reference }} · {{ payment.get_status_display }}</small>{% endfor %}
+            {% if campaign.status == 'awaiting_payment' and campaign.amount_due %}
+              <form class="manual-payment-form" method="post" action="{% url 'owner_manual_payment' 'advertisement' campaign.pk %}">
+                {% csrf_token %}
+                <label for="ad-method-{{ campaign.pk }}">Payment method</label><select class="form-select" name="method" id="ad-method-{{ campaign.pk }}"><option value="mpesa">M-Pesa</option><option value="bank">Bank transfer</option><option value="other">Other</option></select>
+                <label for="ad-reference-{{ campaign.pk }}">Payment reference</label><input class="form-control" name="reference" id="ad-reference-{{ campaign.pk }}" required>
+                <button class="owner-secondary-button" type="submit">Submit for confirmation</button>
+              </form>
+            {% endif %}
+          </div></article>
+        {% empty %}<p class="owner-list-empty">No campaign requests yet.</p>{% endfor %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "customer_dashboard_base.html" %}
+
+{% block title %}My activity{% endblock %}
+{% block heading %}My activity{% endblock %}
+
+{% block account_content %}
+  <section class="owner-dashboard-welcome">
+    <div><span>CUSTOMER SPACE</span><h2>Welcome, {{ request.user.first_name|default:request.user.username }}.</h2><p>Your saved businesses, bookings, enquiries, orders, reviews, and updates in one place.</p></div>
+    <a href="{% url 'businesses' %}"><i class="bi bi-search"></i> Find a business</a>
+  </section>
+
+  <section class="owner-stat-grid" aria-label="Customer account summary">
+    <article><span class="owner-stat-icon"><i class="bi bi-heart"></i></span><div><small>Saved businesses</small><strong>{{ favorites|length }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-blue"><i class="bi bi-calendar-check"></i></span><div><small>Bookings</small><strong>{{ bookings|length }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-green"><i class="bi bi-chat-dots"></i></span><div><small>Enquiries</small><strong>{{ enquiries|length }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-purple"><i class="bi bi-bell"></i></span><div><small>Unread notifications</small><strong>{{ unread_notifications }}</strong></div></article>
+  </section>
+
+  <section class="owner-form-panel">
+    <div class="owner-panel-heading"><div><h2>Notifications</h2><p>Updates about your enquiries, bookings, and reviews.</p></div></div>
+    <div class="owner-record-list">
+      {% for notification in notifications %}
+        <article class="owner-record{% if not notification.is_read %} notification-unread{% endif %}">
+          <span class="owner-record-icon"><i class="bi bi-bell"></i></span>
+          <div class="owner-record-content"><strong>{{ notification.message }}</strong><small>{{ notification.created_at|date:"M j, Y · g:i a" }}</small></div>
+          {% if not notification.is_read %}<form method="post" action="{% url 'notification_read' notification.pk %}">{% csrf_token %}<button class="owner-secondary-button" type="submit">Mark read</button></form>{% endif %}
+        </article>
+      {% empty %}<p class="owner-list-empty">You’re all caught up. New account updates will appear here.</p>{% endfor %}
+    </div>
+  </section>
+
+  <div class="owner-management-grid">
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>Saved businesses</h2><p>Businesses you want to find again.</p></div></div>
+      <div class="owner-record-list">
+        {% for favorite in favorites %}
+          <article class="owner-record"><span class="owner-record-icon"><i class="bi bi-shop"></i></span><div class="owner-record-content"><strong><a href="{% url 'business_detail' favorite.business.pk %}">{{ favorite.business.name }}</a></strong><small>{{ favorite.business.formatted_location }}</small></div></article>
+        {% empty %}<p class="owner-list-empty">Save a business from its profile to see it here.</p>{% endfor %}
+      </div>
+    </section>
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>Recently viewed</h2><p>Your latest business profile visits.</p></div></div>
+      <div class="owner-record-list">
+        {% for viewed in recent_businesses %}
+          <article class="owner-record"><span class="owner-record-icon"><i class="bi bi-clock-history"></i></span><div class="owner-record-content"><strong><a href="{% url 'business_detail' viewed.business.pk %}">{{ viewed.business.name }}</a></strong><small>{{ viewed.last_viewed_at|date:"M j, Y · g:i a" }}</small></div></article>
+        {% empty %}<p class="owner-list-empty">Business profiles you visit while signed in will appear here.</p>{% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="owner-management-grid">
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>My bookings</h2><p>Requests to service providers and their latest status.</p></div></div>
+      <div class="owner-record-list">
+        {% for booking in bookings %}
+          <article class="owner-record"><span class="owner-record-icon"><i class="bi bi-calendar-check"></i></span><div class="owner-record-content"><strong>{{ booking.listing.name }} · {{ booking.listing.business.name }}</strong><small>{{ booking.appointment_at|date:"M j, Y · g:i a" }} · {{ booking.get_status_display }}</small></div>
+            {% if booking.status == 'pending' or booking.status == 'confirmed' %}<form method="post" action="{% url 'customer_booking_cancel' booking.pk %}">{% csrf_token %}<button class="owner-secondary-button" type="submit">Cancel</button></form>{% endif %}
+          </article>
+        {% empty %}<p class="owner-list-empty">Booking requests you make for services will appear here.</p>{% endfor %}
+      </div>
+    </section>
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>My orders</h2><p>Product order requests sent to businesses.</p></div></div>
+      <div class="owner-record-list">
+        {% for order in orders %}
+          <article class="owner-record"><span class="owner-record-icon"><i class="bi bi-bag-check"></i></span><div class="owner-record-content"><strong>{{ order.listing.name }} · {{ order.listing.business.name }}</strong><small>{{ order.created_at|date:"M j, Y" }} · {{ order.get_status_display }}</small><small>{{ order.message|truncatewords:18 }}</small></div></article>
+        {% empty %}<p class="owner-list-empty">Product order requests you submit while signed in will appear here.</p>{% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="owner-management-grid">
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>My enquiries</h2><p>Messages about marketplace products and services.</p></div></div>
+      <div class="owner-record-list">
+        {% for enquiry in enquiries %}
+          <article class="owner-record"><span class="owner-record-icon"><i class="bi bi-chat-left-text"></i></span><div class="owner-record-content"><strong>{{ enquiry.listing.name }} · {{ enquiry.listing.business.name }}</strong><small>{{ enquiry.created_at|date:"M j, Y" }} · {{ enquiry.get_status_display }}</small><small>{{ enquiry.message|truncatewords:18 }}</small></div></article>
+        {% empty %}<p class="owner-list-empty">Marketplace enquiries submitted while signed in will appear here.</p>{% endfor %}
+      </div>
+    </section>
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>My reviews</h2><p>Review moderation and business responses.</p></div></div>
+      <div class="owner-record-list">
+        {% for review in reviews %}
+          <article class="owner-record"><span class="owner-record-icon"><i class="bi bi-star"></i></span><div class="owner-record-content"><strong><a href="{% url 'business_detail' review.business.pk %}">{{ review.business.name }}</a> · {{ review.rating }}/5</strong><small>{{ review.title }} · {% if review.is_approved %}Published{% else %}Awaiting moderation{% endif %}</small>{% if review.owner_response %}<small>Business replied: {{ review.owner_response|truncatewords:18 }}</small>{% endif %}</div></article>
+        {% empty %}<p class="owner-list-empty">Reviews you submit will appear here after you visit a business profile.</p>{% endfor %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

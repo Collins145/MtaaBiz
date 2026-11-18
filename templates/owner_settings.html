@@ -1,0 +1,59 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Account settings{% endblock %}
+{% block heading %}Account settings{% endblock %}
+
+{% block dashboard_content %}
+  <section class="owner-dashboard-welcome">
+    <div><span>ACCOUNT PREFERENCES</span><h2>Manage your sign-in details.</h2><p>Keep your account contact information current and use a strong password to protect your workspace.</p></div>
+    <span class="owner-welcome-mark"><i class="bi bi-gear"></i></span>
+  </section>
+  <div class="owner-management-grid">
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>Account details</h2><p>Used for account access and important messages.</p></div></div>
+      <form method="post" class="owner-form owner-form-single">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="profile">
+        {% for field in profile_form %}
+          <div class="owner-form-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<small class="owner-field-error">{{ error }}</small>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="owner-primary-button" type="submit"><i class="bi bi-check2"></i> Save account details</button>
+      </form>
+    </section>
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>{% if has_usable_password %}Change password{% else %}Set a password{% endif %}</h2><p>{% if has_usable_password %}Confirm your current password before choosing a new one.{% else %}Add a password so you can also sign in without Google.{% endif %}</p></div></div>
+      <form method="post" class="owner-form owner-form-single">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="password">
+        {% for field in password_form %}
+          <div class="owner-form-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<small class="owner-field-error">{{ error }}</small>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="owner-primary-button" type="submit"><i class="bi bi-lock"></i> {% if has_usable_password %}Change password{% else %}Set password{% endif %}</button>
+      </form>
+    </section>
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>Notifications</h2><p>Choose whether MtaaBiz displays in-app booking, enquiry, review, and payment updates for this account.</p></div></div>
+      <form method="post" class="owner-form owner-form-single">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="notifications">
+        {% for field in notification_form %}
+          <div class="owner-form-field owner-notification-toggle">
+            {{ field }}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          </div>
+        {% endfor %}
+        <button class="owner-primary-button" type="submit"><i class="bi bi-bell"></i> Save notification settings</button>
+      </form>
+    </section>
+    {% include "partials/linked_accounts_panel.html" %}
+  </div>
+{% endblock %}

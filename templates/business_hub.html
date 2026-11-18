@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Hub | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body class="mtaabiz-info-page">
+  {% include "partials/page_header.html" %}
+  <main class="container resources-page">
+    <span class="business-detail-kicker">TOOLS FOR LOCAL ENTREPRENEURS</span>
+    <h1>Grow your business with confidence.</h1>
+    <p>Simple, practical starting points for reaching customers, managing cash, and building a trusted local business.</p>
+    <section class="hub-guides">
+      <article><span><i class="bi bi-megaphone"></i></span><h2>Market your business online</h2><p>Keep your business name, phone, location, opening hours, and photos consistent across your MtaaBiz profile and social accounts. Ask happy customers to share your listing.</p></article>
+      <article><span><i class="bi bi-people"></i></span><h2>Attract and retain customers</h2><p>Reply to enquiries promptly, explain prices clearly, and make it easy to contact you. A helpful follow-up can turn a first-time customer into a regular.</p></article>
+      <article><span><i class="bi bi-wallet2"></i></span><h2>Manage business finances</h2><p>Record sales and expenses separately from personal spending. Review cash flow regularly, keep payment evidence, and plan for taxes and upcoming costs.</p></article>
+      <article><span><i class="bi bi-building"></i></span><h2>Register and formalize</h2><p>Business registration requirements depend on the business type. Check current guidance from Kenya’s official eCitizen and Business Registration Service before submitting documents or fees.</p></article>
+      <article><span><i class="bi bi-phone"></i></span><h2>Use social media effectively</h2><p>Share useful updates on a schedule you can maintain. Include your location and contact details, use real product photos, and respond respectfully to questions.</p></article>
+      <article><span><i class="bi bi-tools"></i></span><h2>Run a reliable operation</h2><p>Write down regular tasks, stock levels, delivery arrangements, and service standards. Small routines make it easier to serve customers consistently.</p></article>
+    </section>
+    <section class="owner-form-panel hub-resources-panel">
+      <div class="owner-panel-heading"><div><h2>Guides and resources</h2><p>Articles from the MtaaBiz team.</p></div><a href="{% url 'blog' %}">Read the blog <i class="bi bi-arrow-right"></i></a></div>
+      <div class="resource-card-grid">
+        {% for article in resources %}
+          <article class="resource-card">
+            {% if article.image_url %}<img src="{{ article.image_url }}" alt="" loading="lazy">{% endif %}
+            <h3><a href="{% url 'resource_detail' article.slug %}">{{ article.title }}</a></h3>
+            <p>{{ article.summary }}</p>
+            <a href="{% url 'resource_detail' article.slug %}">Read guide <i class="bi bi-arrow-right"></i></a>
+          </article>
+        {% empty %}
+          <p>New guides are being prepared. The practical tips above are available now.</p>
+        {% endfor %}
+      </div>
+    </section>
+    <a class="owner-primary-button" href="{% url 'add_business' %}">List your business</a>
+  </main>
+  {% include "home_footer.html" %}
+</body>
+</html>

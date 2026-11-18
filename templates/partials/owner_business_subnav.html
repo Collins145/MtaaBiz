@@ -1,0 +1,11 @@
+<nav class="owner-business-subnav" aria-label="Business management">
+  <a class="{% if active_tab == 'profile' %}is-active{% endif %}" href="{% url 'owner_business_profile' business.pk %}"><i class="bi bi-person-vcard"></i> Profile</a>
+  <a class="{% if active_tab == 'listings' %}is-active{% endif %}" href="{% url 'owner_listings' business.pk %}"><i class="bi bi-box-seam"></i> Products & services</a>
+  <a class="{% if active_tab == 'promotions' %}is-active{% endif %}" href="{% url 'owner_promotions' business.pk %}"><i class="bi bi-megaphone"></i> Promotions</a>
+  <a class="{% if active_tab == 'enquiries' %}is-active{% endif %}" href="{% url 'owner_enquiries' business.pk %}"><i class="bi bi-chat-dots"></i> Enquiries</a>
+  <a class="{% if active_tab == 'bookings' %}is-active{% endif %}" href="{% url 'owner_bookings' business.pk %}"><i class="bi bi-calendar-check"></i> Bookings</a>
+  <a class="{% if active_tab == 'reviews' %}is-active{% endif %}" href="{% url 'owner_reviews' business.pk %}"><i class="bi bi-star"></i> Reviews</a>
+  <a class="{% if active_tab == 'analytics' %}is-active{% endif %}" href="{% url 'owner_analytics' business.pk %}"><i class="bi bi-graph-up"></i> Analytics</a>
+  <a class="{% if active_tab == 'advertisements' %}is-active{% endif %}" href="{% url 'owner_advertisements' business.pk %}"><i class="bi bi-megaphone"></i> Advertisements</a>
+  <a class="{% if active_tab == 'subscriptions' %}is-active{% endif %}" href="{% url 'owner_subscriptions' business.pk %}"><i class="bi bi-credit-card"></i> Subscription</a>
+</nav>

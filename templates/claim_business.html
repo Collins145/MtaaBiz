@@ -1,0 +1,35 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Claim a business{% endblock %}
+{% block heading %}Claim an existing listing{% endblock %}
+
+{% block dashboard_content %}
+  <section class="owner-dashboard-welcome">
+    <div><span>IS YOUR BUSINESS ALREADY HERE?</span><h2>Take ownership of your listing.</h2><p>Submit your details and the MtaaBiz team will review your request before giving you access.</p></div>
+    <span class="owner-welcome-mark"><i class="bi bi-key"></i></span>
+  </section>
+  <section class="owner-form-panel owner-form-panel-narrow">
+    <div class="owner-panel-heading"><div><h2>Claim details</h2><p>Choose an unclaimed, published business listing.</p></div></div>
+    {% if has_claimable_businesses %}
+      <form method="post" class="owner-form owner-form-single">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="owner-form-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<small class="owner-field-error">{{ error }}</small>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="owner-primary-button" type="submit"><i class="bi bi-send"></i> Submit claim</button>
+      </form>
+    {% else %}
+      <div class="owner-empty-state owner-empty-state-small">
+        <span><i class="bi bi-shop"></i></span>
+        <h3>No unclaimed listings available</h3>
+        <p>All published business listings are currently claimed. If your business is missing, add it to MtaaBiz instead.</p>
+        <a href="{% url 'add_business' %}" class="owner-primary-button">Add your business</a>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

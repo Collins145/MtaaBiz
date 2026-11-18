@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MtaaBiz admin dashboard</title>
+    {% load static %}
+    <link
+      href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}"
+      rel="stylesheet"
+    />
+    <link
+      href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}"
+      rel="stylesheet"
+    />
+    <link href="{% static 'assets/css/main.css' %}" rel="stylesheet" />
+  </head>
+  <body class="contacts-dashboard owner-dashboard">
+    <div class="contacts-dashboard-layout">
+      <aside class="contacts-sidebar">
+        <a href="{% url 'index' %}" class="contacts-dashboard-logo">
+          <img src="{% static 'assets/img/MtaaBz.png' %}" alt="MtaaBiz" />
+        </a>
+        <p class="contacts-sidebar-label">ADMIN WORKSPACE</p>
+        <nav aria-label="Admin dashboard navigation">
+          <a
+            class="is-active"
+            href="{% url 'admin_reports' %}"
+            aria-current="page"
+            ><i class="bi bi-speedometer2"></i> Dashboard</a
+          >
+          <a href="{% url 'admin:index' %}"
+            ><i class="bi bi-gear"></i> Site administration</a
+          >
+          <a href="{% url 'businesses' %}"
+            ><i class="bi bi-shop"></i> Business directory</a
+          >
+          <a href="{% url 'marketplace' %}"
+            ><i class="bi bi-bag"></i> Marketplace</a
+          >
+          <a href="{% url 'pricing' %}"><i class="bi bi-tags"></i> Pricing</a>
+          <a href="{% url 'contact' %}"
+            ><i class="bi bi-envelope"></i> Contact messages</a
+          >
+          <a href="{% url 'index' %}"
+            ><i class="bi bi-house"></i> View website</a
+          >
+          <form
+            method="post"
+            action="{% url 'logout' %}"
+            class="owner-logout-form"
+          >
+            {% csrf_token %}
+            <button type="submit">
+              <i class="bi bi-box-arrow-right"></i> Sign out
+            </button>
+          </form>
+        </nav>
+        <div class="contacts-sidebar-bottom">
+          <span class="contacts-sidebar-mark"
+            ><i class="bi bi-shield-lock"></i
+          ></span>
+          <p>Protecting the<br /><strong>MtaaBiz platform.</strong></p>
+        </div>
+      </aside>
+
+      <main class="contacts-dashboard-main">
+        <header class="contacts-dashboard-topbar">
+          <div>
+            <p>MTAABIZ ADMIN</p>
+            <h1>Platform dashboard</h1>
+          </div>
+          <a class="contacts-view-site" href="{% url 'index' %}"
+            ><i class="bi bi-box-arrow-up-right"></i> View website</a
+          >
+        </header>
+
+        {% if messages %}
+        <div class="owner-dashboard-messages" role="status">
+          {% for message in messages %}
+          <p
+            class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %}"
+          >
+            {{ message }}
+          </p>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="contacts-summary-grid">
+          <div class="contacts-summary-card">
+            <span class="contacts-summary-icon summary-orange"
+              ><i class="bi bi-box-arrow-in-right"></i
+            ></span>
+            <p>Total logins recorded</p>
+            <strong>{{ login_totals.total_logins }}</strong>
+            <span class="contacts-summary-caption"
+              >{{ login_totals.password_logins }} password · {{
+              login_totals.google_logins }} Google</span
+            >
+          </div>
+          <div class="contacts-summary-card">
+            <span class="contacts-summary-icon summary-blue"
+              ><i class="bi bi-people"></i
+            ></span>
+            <p>Unique users</p>
+            <strong>{{ login_totals.unique_users }}</strong>
+            <span class="contacts-summary-caption"
+              >{{ monthly_logins.unique_users }} active this month</span
+            >
+          </div>
+          <div class="contacts-summary-card">
+            <span class="contacts-summary-icon summary-green"
+              ><i class="bi bi-cash-coin"></i
+            ></span>
+            <p>Revenue this month</p>
+            <strong>KSh {{ monthly_revenue|floatformat:2 }}</strong>
+            <span class="contacts-summary-caption"
+              >{{ monthly_payments }} confirmed payments</span
+            >
+          </div>
+          <div class="contacts-summary-card">
+            <span class="contacts-summary-icon summary-blue"
+              ><i class="bi bi-shop"></i
+            ></span>
+            <p>Published businesses</p>
+            <strong>{{ published_business_count }}</strong>
+            <span class="contacts-summary-caption"
+              >{{ pending_business_count }} awaiting publication</span
+            >
+          </div>
+          <div class="contacts-summary-card">
+            <span class="contacts-summary-icon summary-orange"
+              ><i class="bi bi-hourglass-split"></i
+            ></span>
+            <p>Pending moderation</p>
+            <strong>{{ pending_reviews }}</strong>
+            <span class="contacts-summary-caption"
+              >{{ pending_claims }} claims · {{ pending_verifications }}
+              verifications</span
+            >
+          </div>
+          <div class="contacts-summary-card">
+            <span class="contacts-summary-icon summary-green"
+              ><i class="bi bi-megaphone"></i
+            ></span>
+            <p>Active campaigns</p>
+            <strong>{{ active_campaigns }}</strong>
+            <span class="contacts-summary-caption"
+              >{{ active_subscriptions }} active subscriptions</span
+            >
+          </div>
+        </div>
+
+        <div class="contacts-table-panel">
+          <div class="contacts-panel-heading">
+            <div>
+              <h2>Recent user logins</h2>
+              <p>How users access the system · latest 15 sign-ins</p>
+            </div>
+            <a class="contacts-view-site" href="{% url 'admin_business_csv' %}"
+              ><i class="bi bi-download"></i> Businesses CSV</a
+            >
+          </div>
+          <div class="contacts-table-scroll">
+            <table class="contacts-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Method</th>
+                  <th>IP address</th>
+                  <th>Device / browser</th>
+                  <th>When</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for login in recent_logins %}
+                <tr>
+                  <td>{{ login.user.username }}</td>
+                  <td>{{ login.get_method_display }}</td>
+                  <td>{{ login.ip_address|default:"—" }}</td>
+                  <td>{{ login.user_agent|default:"—"|truncatechars:48 }}</td>
+                  <td>{{ login.created_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr class="contacts-empty-row">
+                  <td colspan="5">
+                    <div class="contacts-empty-state">
+                      <span><i class="bi bi-clock-history"></i></span>
+                      <h3>No logins recorded yet</h3>
+                      <p>User sign-ins will appear here automatically.</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div
+          class="contacts-summary-grid"
+          style="grid-template-columns: repeat(2, minmax(0, 1fr))"
+        >
+          <div class="contacts-table-panel">
+            <div class="contacts-panel-heading">
+              <div>
+                <h2>Access methods</h2>
+                <p>All-time logins by sign-in method</p>
+              </div>
+            </div>
+            <div class="contacts-table-scroll">
+              <table class="contacts-table">
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Logins</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in login_method_breakdown %}
+                  <tr>
+                    <td>{{ row.method|capfirst|cut:"_" }}</td>
+                    <td>{{ row.total }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr class="contacts-empty-row">
+                    <td colspan="2">
+                      <div class="contacts-empty-state">
+                        <span><i class="bi bi-person-check"></i></span>
+                        <h3>No logins yet</h3>
+                        <p>
+                          The method breakdown will appear after the first
+                          sign-in.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="contacts-table-panel">
+            <div class="contacts-panel-heading">
+              <div>
+                <h2>Engagement this month</h2>
+                <p>Business events recorded across the platform</p>
+              </div>
+            </div>
+            <div class="contacts-table-scroll">
+              <table class="contacts-table">
+                <thead>
+                  <tr>
+                    <th>Event</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for metric in event_metrics %}
+                  <tr>
+                    <td>{{ metric.event_type|capfirst|cut:"_" }}</td>
+                    <td>{{ metric.total }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr class="contacts-empty-row">
+                    <td colspan="2">
+                      <div class="contacts-empty-state">
+                        <span><i class="bi bi-bar-chart"></i></span>
+                        <h3>No engagement yet</h3>
+                        <p>
+                          Profile views and contact clicks will appear here.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="contacts-table-panel">
+          <div class="contacts-panel-heading">
+            <div>
+              <h2>Most-viewed profiles</h2>
+              <p>Published businesses ranked by profile views</p>
+            </div>
+            <a class="contacts-view-site" href="{% url 'admin_revenue_csv' %}"
+              ><i class="bi bi-download"></i> Payments CSV</a
+            >
+          </div>
+          <div class="contacts-table-scroll">
+            <table class="contacts-table">
+              <thead>
+                <tr>
+                  <th>Business</th>
+                  <th>Profile views</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for business in top_businesses %}
+                <tr>
+                  <td>{{ business.name }}</td>
+                  <td>{{ business.profile_views }}</td>
+                </tr>
+                {% empty %}
+                <tr class="contacts-empty-row">
+                  <td colspan="2">
+                    <div class="contacts-empty-state">
+                      <span><i class="bi bi-trophy"></i></span>
+                      <h3>No published business profiles</h3>
+                      <p>Approve businesses to see view statistics here.</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="contacts-table-panel">
+          <div class="contacts-panel-heading">
+            <div>
+              <h2>Platform overview</h2>
+              <p>Content and moderation queue at a glance</p>
+            </div>
+          </div>
+          <div class="contacts-table-scroll">
+            <table class="contacts-table">
+              <thead>
+                <tr>
+                  <th>Businesses</th>
+                  <th>Published</th>
+                  <th>Awaiting publication</th>
+                  <th>Reviews pending</th>
+                  <th>Reports pending</th>
+                  <th>Claims pending</th>
+                  <th>Verifications pending</th>
+                  <th>Active campaigns</th>
+                  <th>Active subscriptions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ business_count }}</td>
+                  <td>{{ published_business_count }}</td>
+                  <td>{{ pending_business_count }}</td>
+                  <td>{{ pending_reviews }}</td>
+                  <td>{{ pending_business_reports }}</td>
+                  <td>{{ pending_claims }}</td>
+                  <td>{{ pending_verifications }}</td>
+                  <td>{{ active_campaigns }}</td>
+                  <td>{{ active_subscriptions }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <footer class="contacts-dashboard-footer">
+          <span>© {% now "Y" %} MtaaBiz</span>
+          <span
+            >Revenue includes only manual payments confirmed by an
+            administrator. Logins are recorded automatically on every
+            sign-in.</span
+          >
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

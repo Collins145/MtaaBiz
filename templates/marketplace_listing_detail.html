@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ listing.name }} | MtaaBiz Marketplace</title>
+  <meta name="description" content="{{ listing.description|truncatewords:24 }}">
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body>
+  <main class="container marketplace-detail-page py-4">
+    <nav class="marketplace-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'index' %}">Home</a>
+      <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      <a href="{% url 'marketplace' %}">Marketplace</a>
+      <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      <span aria-current="page">{{ listing.name }}</span>
+    </nav>
+    <div class="marketplace-detail-layout">
+      <div class="marketplace-detail-image">
+        {% if listing.image_url %}
+          <img src="{{ listing.image_url }}" alt="{{ listing.name }}">
+        {% else %}
+          <div class="marketplace-image-placeholder" aria-hidden="true"><i class="bi bi-{% if listing.listing_type == 'service' %}tools{% else %}bag{% endif %}"></i></div>
+        {% endif %}
+      </div>
+      <article class="marketplace-detail-content">
+        <p class="marketplace-detail-kicker">
+          {{ listing.get_listing_type_display }}{% if listing.category %} · {{ listing.category.name }}{% endif %}
+        </p>
+        <h1>{{ listing.name }}</h1>
+        <p class="marketplace-price">
+          {% if listing.price != None %}
+            {% if listing.listing_type == 'service' %}From {% endif %}KSh {{ listing.price|floatformat:2 }}
+          {% else %}
+            <span>Request a quote</span>
+          {% endif %}
+        </p>
+        <div class="marketplace-detail-description">{{ listing.description|linebreaks }}</div>
+        <section class="marketplace-detail-seller" aria-labelledby="seller-heading">
+          <h2 id="seller-heading">Seller information</h2>
+          <p class="marketplace-detail-business">
+            {{ listing.business.name }}
+            {% if listing.business.is_verified %}<span class="marketplace-verified"><i class="bi bi-patch-check-fill"></i> Verified</span>{% endif %}
+          </p>
+          {% if listing.business.contact_name %}<p>Contact: {{ listing.business.contact_name }}</p>{% endif %}
+          <p><i class="bi bi-geo-alt"></i> {{ listing.business.formatted_location }}</p>
+          {% if listing.business.phone %}<p><i class="bi bi-telephone"></i> <a href="{% url 'track_business_contact' listing.business.pk 'phone' %}">{{ listing.business.phone }}</a> · <a href="{% url 'track_business_contact' listing.business.pk 'whatsapp' %}">WhatsApp</a></p>{% endif %}
+          {% if listing.business.email %}<p><i class="bi bi-envelope"></i> <a href="{% url 'track_business_contact' listing.business.pk 'email' %}">{{ listing.business.email }}</a></p>{% endif %}
+          <a href="{% url 'business_detail' listing.business.pk %}">View business profile</a>
+        </section>
+        <div class="marketplace-detail-actions">
+          <a class="btn btn-primary" href="{% url 'marketplace_enquiry' listing.pk %}">
+            {% if listing.listing_type == 'service' %}Enquire or request a quote{% else %}Enquire or order{% endif %}
+          </a>
+          {% if listing.listing_type == 'service' %}
+            {% if user.is_authenticated %}
+              <form class="marketplace-booking-form" method="post" action="{% url 'service_booking' listing.pk %}">
+                {% csrf_token %}
+                <h2>Request a booking</h2>
+                {% for field in booking_form %}
+                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                  {% for error in field.errors %}<small class="owner-field-error">{{ error }}</small>{% endfor %}
+                {% endfor %}
+                <button class="btn btn-outline-primary" type="submit">Send booking request</button>
+              </form>
+            {% else %}
+              <a class="btn btn-outline-primary" href="{% url 'login' %}?next={{ request.path|urlencode }}">Sign in to request a booking</a>
+            {% endif %}
+          {% endif %}
+          <a href="{% url 'marketplace' %}" class="marketplace-detail-back">Back to marketplace</a>
+        </div>
+      </article>
+    </div>
+  </main>
+</body>
+</html>

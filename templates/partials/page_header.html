@@ -1,0 +1,19 @@
+{% load static %}
+<header class="subpage-header">
+  <div class="container subpage-header-inner">
+    <a class="subpage-logo" href="{% url 'index' %}" aria-label="MtaaBiz home">
+      <img src="{% static 'assets/img/MtaaBz.png' %}" alt="MtaaBiz">
+    </a>
+    <nav class="subpage-nav" aria-label="Main navigation">
+      <a href="{% url 'index' %}">Home</a>
+      <a href="{% url 'about' %}"{% if request.resolver_match.url_name == 'about' %} aria-current="page"{% endif %}>About</a>
+      <a href="{% url 'businesses' %}">Businesses</a>
+      <a href="{% url 'deals' %}"{% if request.resolver_match.url_name == 'deals' %} aria-current="page"{% endif %}>Deals</a>
+      <a href="{% url 'marketplace' %}">Marketplace</a>
+      <a href="{% url 'business_hub' %}">Business Hub</a>
+      <a href="{% url 'blog' %}">Blog</a>
+      <a href="{% url 'contact' %}"{% if request.resolver_match.url_name == 'contact' %} aria-current="page"{% endif %}>Contact</a>
+    </nav>
+    <a class="subpage-header-cta" href="{% if user.is_authenticated %}{% url 'business_dashboard' %}{% else %}{% url 'add_business' %}{% endif %}">{% if user.is_authenticated %}Business dashboard{% else %}List your business{% endif %}</a>
+  </div>
+</header>

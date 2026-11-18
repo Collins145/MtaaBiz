@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact MtaaBiz</title>
+  <meta name="description" content="Contact the MtaaBiz team with questions, feedback, or support requests.">
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
+</head>
+<body class="mtaabiz-info-page contact-page">
+  {% include "partials/page_header.html" %}
+  <main>
+    <section class="contact-page-intro">
+      <div class="container contact-page-intro-inner">
+        <div>
+          <span>WE'RE HERE TO HELP</span>
+          <h1>Let’s get in touch.</h1>
+          <p>Have a question, suggestion, or need help using MtaaBiz? Send us a message and our team will follow up.</p>
+        </div>
+        <div class="contact-page-icon" aria-hidden="true"><i class="bi bi-chat-heart"></i></div>
+      </div>
+    </section>
+    <section class="contact-page-content">
+      <div class="container contact-page-grid">
+        <aside class="contact-page-aside">
+          <span>CONTACT MTAABIZ</span>
+          <h2>How can we help?</h2>
+          <p>Use the form to share feedback, ask a question, or request support.</p>
+          {% if site_settings %}
+            {% if site_settings.support_email %}<p><i class="bi bi-envelope"></i> <a href="mailto:{{ site_settings.support_email }}">{{ site_settings.support_email }}</a></p>{% endif %}
+            {% if site_settings.support_phone %}<p><i class="bi bi-telephone"></i> <a href="tel:{{ site_settings.support_phone }}">{{ site_settings.support_phone }}</a></p>{% endif %}
+            {% if site_settings.whatsapp_url %}<p><i class="bi bi-whatsapp"></i> <a href="{{ site_settings.whatsapp_url }}" target="_blank" rel="noopener noreferrer">Message MtaaBiz on WhatsApp</a></p>{% endif %}
+            {% if site_settings.contact_address %}<p><i class="bi bi-geo-alt"></i> {{ site_settings.contact_address }}</p>{% endif %}
+          {% endif %}
+          <div class="contact-guidance-card">
+            <i class="bi bi-shop-window" aria-hidden="true"></i>
+            <div>
+              <h3>Looking for a business?</h3>
+              <p>Browse local listings to find business details and contact sellers directly.</p>
+              <a href="{% url 'businesses' %}">Browse businesses <i class="bi bi-arrow-right"></i></a>
+            </div>
+            {% if social_links %}
+              <div class="contact-social-links" aria-label="MtaaBiz social media">
+                {% for social in social_links %}<a href="{{ social.url }}" target="_blank" rel="noopener noreferrer" aria-label="MtaaBiz on {{ social.platform }}"><i class="{{ social.icon_class }}"></i>{{ social.platform }}</a>{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="contact-guidance-card">
+            <i class="bi bi-bag-heart" aria-hidden="true"></i>
+            <div>
+              <h3>Need a product or service?</h3>
+              <p>Send a product enquiry or request a quote through the marketplace.</p>
+              <a href="{% url 'marketplace' %}">Visit marketplace <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+        </aside>
+        <div class="contact-page-form-card">
+          {% include "home_contact.html" %}
+        </div>
+      </div>
+    </section>
+  </main>
+  {% include "home_footer.html" %}
+</body>
+</html>

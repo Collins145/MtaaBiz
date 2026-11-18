@@ -1,0 +1,18 @@
+{% load static %}
+<aside class="contacts-sidebar">
+  <a href="{% url 'index' %}" class="contacts-dashboard-logo">
+    <img src="{% static 'assets/img/MtaaBz.png' %}" alt="MtaaBiz">
+  </a>
+  <p class="contacts-sidebar-label">WORKSPACE</p>
+  <nav aria-label="Dashboard navigation">
+    <a class="{% if active_page == 'inbox' %}is-active{% endif %}" href="{% url 'show' %}"{% if active_page == 'inbox' %} aria-current="page"{% endif %}><i class="bi bi-inbox"></i> Contact inbox</a>
+    <a href="{% url 'contact' %}"><i class="bi bi-chat-dots"></i> Contact page</a>
+    <a href="{% url 'businesses' %}"><i class="bi bi-shop"></i> Business directory</a>
+    <a href="{% url 'index' %}"><i class="bi bi-house"></i> View website</a>
+    <a class="{% if active_page == 'settings' %}is-active{% endif %}" href="{% url 'dashboard_settings' %}"{% if active_page == 'settings' %} aria-current="page"{% endif %}><i class="bi bi-gear"></i> Settings</a>
+  </nav>
+  <div class="contacts-sidebar-bottom">
+    <span class="contacts-sidebar-mark"><i class="bi bi-stars"></i></span>
+    <p>Helping local<br><strong>businesses grow.</strong></p>
+  </div>
+</aside>

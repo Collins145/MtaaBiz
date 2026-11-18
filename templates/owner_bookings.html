@@ -1,0 +1,34 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Bookings{% endblock %}
+{% block heading %}Service bookings{% endblock %}
+
+{% block dashboard_content %}
+  {% include "partials/owner_business_subnav.html" with active_tab="bookings" %}
+  <section class="owner-form-panel">
+    <div class="owner-panel-heading"><div><h2>{{ business.name }} booking requests</h2><p>Confirm, decline, or complete customer appointments.</p></div></div>
+    <div class="owner-enquiry-list">
+      {% for booking in bookings %}
+        <article class="owner-enquiry">
+          <div class="owner-enquiry-header"><div><span class="owner-enquiry-type">{{ booking.created_at|date:"M j, Y" }}</span><h3>{{ booking.listing.name }}</h3><p>{{ booking.customer.get_full_name|default:booking.customer.username }} · {{ booking.customer.email }}</p></div><span class="owner-status owner-status-review">{{ booking.get_status_display }}</span></div>
+          <p><strong>Requested appointment:</strong> {{ booking.appointment_at|date:"M j, Y · g:i a" }}</p>
+          {% if booking.message %}<p class="owner-enquiry-message">{{ booking.message }}</p>{% endif %}
+          {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+            <form method="post" action="{% url 'owner_booking_update' booking.pk %}" class="owner-enquiry-status-form">
+              {% csrf_token %}
+              <label for="booking-status-{{ booking.pk }}">Update booking</label>
+              <select id="booking-status-{{ booking.pk }}" name="status" class="form-select">
+                <option value="confirmed"{% if booking.status == 'confirmed' %} selected{% endif %}>Confirm</option>
+                <option value="declined">Decline</option>
+                <option value="completed">Mark completed</option>
+              </select>
+              <button class="owner-secondary-button" type="submit">Save status</button>
+            </form>
+          {% endif %}
+        </article>
+      {% empty %}
+        <div class="owner-empty-state owner-empty-state-small"><span><i class="bi bi-calendar-check"></i></span><h3>No bookings yet</h3><p>Customer appointment requests for your published services will appear here.</p></div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

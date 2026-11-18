@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Deals and Offers | MtaaBiz</title>
+  <meta name="description" content="Browse current promotions and offers from local MtaaBiz businesses.">
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
+</head>
+<body class="mtaabiz-info-page">
+  {% include "partials/page_header.html" %}
+  <main>
+    <section class="info-page-hero deals-page-hero">
+      <div class="container deals-page-hero-inner">
+        <div>
+          <span class="info-page-eyebrow">LOCAL DEALS</span>
+          <h1>Good finds. <span>Right around the corner.</span></h1>
+          <p>Explore current offers from local businesses and connect with sellers directly for details.</p>
+          <a class="btn btn-primary" href="#current-deals">Browse current deals <i class="bi bi-arrow-down"></i></a>
+        </div>
+        <div class="deals-hero-icon" aria-hidden="true">
+          <span><i class="bi bi-tag-fill"></i></span>
+          <i class="bi bi-stars"></i>
+        </div>
+      </div>
+    </section>
+
+    <section class="deals-list-section" id="current-deals">
+      <div class="container">
+        <div class="info-section-heading deals-section-heading">
+          <span>WHAT'S ON</span>
+          <h2>Current promotions and offers</h2>
+          <p>Offers shown here are published by participating businesses. Please contact the business to confirm availability and terms.</p>
+        </div>
+        <div class="row g-4">
+          {% for promotion in promotions %}
+            <div class="col-md-6 col-lg-4">
+              <article class="deal-card">
+                <div class="deal-card-image">
+                  {% if promotion.business.image_url %}
+                    <img src="{{ promotion.business.image_url }}" alt="{{ promotion.business.name }}" loading="lazy">
+                  {% else %}
+                    <div class="deal-image-placeholder" aria-hidden="true"><i class="bi bi-shop"></i></div>
+                  {% endif %}
+                  <span class="deal-ribbon"><i class="bi bi-tag-fill"></i> Local offer</span>
+                </div>
+                <div class="deal-card-body">
+                  {% if promotion.business.category %}<p class="deal-category">{{ promotion.business.category.name }}</p>{% endif %}
+                  <h3>{{ promotion.title }}</h3>
+                  <p class="deal-business"><i class="bi bi-shop"></i> {{ promotion.business.name }}</p>
+                  {% if promotion.description %}<p class="deal-description">{{ promotion.description }}</p>{% endif %}
+                  <div class="deal-card-meta">
+                    <span><i class="bi bi-geo-alt"></i> {{ promotion.business.formatted_location }}</span>
+                    {% if promotion.ends_on %}<span><i class="bi bi-clock"></i> Ends {{ promotion.ends_on|date:"M j, Y" }}</span>{% endif %}
+                  </div>
+                  <a class="deal-card-link" href="{% url 'businesses' %}?q={{ promotion.business.name|urlencode }}">
+                    View business details <i class="bi bi-arrow-right"></i>
+                  </a>
+                </div>
+              </article>
+            </div>
+          {% empty %}
+            <div class="col-12">
+              <div class="deals-empty-state">
+                <span><i class="bi bi-tag"></i></span>
+                <h3>No active deals just yet</h3>
+                <p>Local businesses will post their latest offers here. In the meantime, explore businesses and see what they offer.</p>
+                <a class="btn btn-primary" href="{% url 'businesses' %}">Browse local businesses</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="deals-owner-cta">
+      <div class="container deals-owner-cta-inner">
+        <div>
+          <span>BUSINESS OWNER?</span>
+          <h2>Promote your business on MtaaBiz</h2>
+          <p>List your business and share offers with local customers.</p>
+        </div>
+        <a class="btn btn-light" href="{% url 'add_business' %}">Get started <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </section>
+  </main>
+  {% include "home_footer.html" %}
+</body>
+</html>

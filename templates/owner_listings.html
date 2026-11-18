@@ -1,0 +1,53 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Products & services{% endblock %}
+{% block heading %}Products & services{% endblock %}
+
+{% block dashboard_content %}
+  {% include "partials/owner_business_subnav.html" with active_tab="listings" %}
+  <div class="owner-management-grid">
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading">
+        <div><h2>Add a listing</h2><p>Products and services are reviewed before public display.</p></div>
+      </div>
+      <form method="post" class="owner-form owner-form-single">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="owner-form-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<small class="owner-field-error">{{ error }}</small>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="owner-primary-button" type="submit"><i class="bi bi-plus-lg"></i> Save listing</button>
+      </form>
+    </section>
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading">
+        <div><h2>{{ business.name }} listings</h2><p>{{ listings|length }} products and services</p></div>
+      </div>
+      <div class="owner-record-list">
+        {% for listing in listings %}
+          <article class="owner-record">
+            <span class="owner-record-icon"><i class="bi {% if listing.listing_type == 'service' %}bi-tools{% else %}bi-box{% endif %}"></i></span>
+            <div class="owner-record-content">
+              <strong>{{ listing.name }}</strong>
+              <small>{{ listing.get_listing_type_display }} · {% if listing.price %}KSh {{ listing.price }}{% else %}Price on request{% endif %}</small>
+              <small>{% if listing.is_published %}Published{% else %}Awaiting review{% endif %}</small>
+            </div>
+            <div class="owner-record-actions">
+              <a href="{% url 'owner_listing_edit' listing.pk %}" aria-label="Edit {{ listing.name }}"><i class="bi bi-pencil-square"></i></a>
+              <form method="post" action="{% url 'owner_listing_delete' listing.pk %}" onsubmit="return confirm('Remove this listing?');">
+                {% csrf_token %}
+                <button type="submit" aria-label="Remove {{ listing.name }}"><i class="bi bi-trash3"></i></button>
+              </form>
+            </div>
+          </article>
+        {% empty %}
+          <p class="owner-list-empty">No products or services yet. Add your first listing using the form.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

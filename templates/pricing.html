@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listing packages | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body class="mtaabiz-info-page pricing-page">
+  {% include "partials/page_header.html" %}
+  <main>
+    <section class="pricing-info-hero">
+      <div class="container">
+        <span>GROW WITH MTAABIZ</span>
+        <h1>Find the right way to get started.</h1>
+        <p>Start with a business profile, then talk with our team about visibility options as your needs grow.</p>
+      </div>
+    </section>
+    <section class="container pricing-info-content">
+      <div class="owner-pricing-grid" aria-label="MtaaBiz listing packages">
+        {% for plan in plans %}
+          <article class="owner-pricing-card{% if forloop.first %} owner-pricing-card-featured{% endif %}">
+            <span class="owner-pricing-label">{% if forloop.first %}GET DISCOVERED{% else %}GROW WITH MTAABIZ{% endif %}</span>
+            <h2>{{ plan.name }}</h2>
+            <p class="owner-pricing-price">{% if plan.amount != None %}KSh {{ plan.amount|floatformat:2 }}{% else %}Contact us{% endif %}</p>
+            <p>{{ plan.description|default:"Build your business profile and help local customers discover your products and services." }}</p>
+            <p>{{ plan.get_billing_period_display }}</p>
+            <a class="owner-primary-button" href="{% if user.is_authenticated %}{% url 'business_dashboard' %}{% else %}{% url 'register' %}?next={% url 'business_dashboard' %}{% endif %}">Choose this package</a>
+          </article>
+        {% empty %}
+          <article class="owner-pricing-card">
+            <span class="owner-pricing-label">GET DISCOVERED</span>
+            <h2>Business listing</h2>
+            <p class="owner-pricing-price">Contact us</p>
+            <p>Build your MtaaBiz business profile and help local customers discover your products and services.</p>
+            <ul><li><i class="bi bi-check2"></i> Business profile and contact details</li><li><i class="bi bi-check2"></i> Products and services catalogue</li><li><i class="bi bi-check2"></i> Customer enquiries</li></ul>
+            <a class="owner-secondary-button" href="{% url 'add_business' %}">Create a listing</a>
+          </article>
+          <article class="owner-pricing-card owner-pricing-card-featured">
+            <span class="owner-pricing-label">INCREASE VISIBILITY</span>
+            <h2>Promoted listing</h2>
+            <p class="owner-pricing-price">Contact us</p>
+            <p>Explore featured placement and campaign options tailored to your business goals.</p>
+            <ul><li><i class="bi bi-check2"></i> Featured placement options</li><li><i class="bi bi-check2"></i> Promotion and offer support</li><li><i class="bi bi-check2"></i> Guidance from the MtaaBiz team</li></ul>
+            <a class="owner-primary-button" href="{% url 'contact' %}">Ask about promotion</a>
+          </article>
+        {% endfor %}
+      </div>
+      <p class="pricing-business-cta"><a href="{% url 'add_business' %}">List your business</a> or sign in to request a package for an existing listing.</p>
+      <p class="owner-pricing-note">Payments are handled manually. Submit a package request from your business dashboard; MtaaBiz will confirm the amount and payment instructions. No online checkout is used.</p>
+    </section>
+  </main>
+  {% include "home_footer.html" %}
+</body>
+</html>

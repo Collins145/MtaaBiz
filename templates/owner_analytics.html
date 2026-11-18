@@ -1,0 +1,28 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Analytics{% endblock %}
+{% block heading %}Business analytics{% endblock %}
+
+{% block dashboard_content %}
+  {% include "partials/owner_business_subnav.html" with active_tab="analytics" %}
+  <section class="owner-dashboard-welcome"><div><span>LAST 30 DAYS</span><h2>{{ business.name }}</h2><p>Counts are recorded by MtaaBiz since analytics tracking was enabled. They are activity totals, not unique visitors.</p></div></section>
+  <section class="owner-stat-grid" aria-label="Business engagement in the last 30 days">
+    <article><span class="owner-stat-icon"><i class="bi bi-eye"></i></span><div><small>Profile views</small><strong>{{ metrics.profile_views|default:0 }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-blue"><i class="bi bi-telephone"></i></span><div><small>Phone clicks</small><strong>{{ metrics.phone_clicks|default:0 }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-green"><i class="bi bi-whatsapp"></i></span><div><small>WhatsApp clicks</small><strong>{{ metrics.whatsapp_clicks|default:0 }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-purple"><i class="bi bi-envelope"></i></span><div><small>Email / website clicks</small><strong>{{ metrics.email_clicks|add:metrics.website_clicks }}</strong></div></article>
+  </section>
+  <section class="owner-stat-grid">
+    <article><span class="owner-stat-icon"><i class="bi bi-calendar-check"></i></span><div><small>Booking requests</small><strong>{{ booking_count }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-blue"><i class="bi bi-star"></i></span><div><small>Approved reviews</small><strong>{{ review_count }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-green"><i class="bi bi-chat-dots"></i></span><div><small>Enquiries</small><strong>{{ enquiry_count }}</strong></div></article>
+  </section>
+  <section class="owner-form-panel">
+    <div class="owner-panel-heading"><div><h2>Recent activity</h2><p>Contact details are not collected in these analytics records.</p></div></div>
+    <div class="owner-record-list">
+      {% for event in recent_events %}
+        <article class="owner-record"><span class="owner-record-icon"><i class="bi bi-activity"></i></span><div class="owner-record-content"><strong>{{ event.get_event_type_display }}</strong><small>{{ event.created_at|date:"M j, Y · g:i a" }}</small></div></article>
+      {% empty %}<p class="owner-list-empty">Engagement activity will appear when customers view your profile or use its contact links.</p>{% endfor %}
+    </div>
+  </section>
+{% endblock %}

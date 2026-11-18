@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Featured Businesses | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body>
+  <main class="container featured-directory py-5">
+    <a href="{% url 'index' %}#featured-businesses" class="business-back-link">
+      <i class="bi bi-arrow-left"></i> Back to home
+    </a>
+    <header class="featured-directory-heading">
+      <span>MTAABIZ BUSINESS DIRECTORY</span>
+      <h1>Featured Businesses</h1>
+      <p>Top-rated and trusted local businesses. Explore what they offer and get in touch.</p>
+    </header>
+
+    <section aria-labelledby="featured-directory-results">
+      <div class="featured-directory-results-heading">
+        <h2 id="featured-directory-results">Discover local businesses</h2>
+        <p>{{ businesses|length }} featured business{{ businesses|length|pluralize }}</p>
+      </div>
+      <div class="row g-4">
+        {% for business in businesses %}
+          {% include "partials/business_card.html" with business=business show_full_details=True directory_view=True %}
+        {% empty %}
+          <div class="col-12">
+            <div class="featured-directory-empty">
+              <i class="bi bi-shop-window" aria-hidden="true"></i>
+              <h2>Featured businesses are coming soon</h2>
+              <p>Check back soon to explore trusted businesses in your community.</p>
+              <a class="btn btn-primary" href="{% url 'businesses' %}">Browse all businesses</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Local Businesses | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
+</head>
+<body>
+  <main class="container py-5" id="results">
+    <a href="{% url 'index' %}" class="business-back-link"><i class="bi bi-arrow-left"></i> MtaaBiz home</a>
+    <h1 class="business-results-title">Find Local Businesses</h1>
+    <form class="business-filter-form" action="{% url 'businesses' %}" method="get" role="search">
+      <label>
+        Search businesses, products or services
+        <input class="form-control" type="search" name="q" value="{{ query }}" placeholder="Try a business name or service">
+      </label>
+      <label>
+        Category
+        <select class="form-select" name="category">
+          <option value="">All categories</option>
+          {% for category in categories %}
+            <option value="{{ category.slug }}"{% if selected_category == category.slug %} selected{% endif %}>{{ category.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Location
+        <input class="form-control" type="search" name="location" value="{{ location }}" placeholder="Town or neighborhood">
+      </label>
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    <div class="business-discovery-actions">
+      <a class="owner-secondary-button" href="{% url 'nearby_businesses' %}"><i class="bi bi-geo-alt"></i> Find businesses near me</a>
+      <a class="owner-secondary-button" href="{% url 'business_assistant' %}"><i class="bi bi-stars"></i> Describe what you need</a>
+    </div>
+
+    <section class="business-results" aria-live="polite">
+      <h2>Businesses{% if query %} matching “{{ query }}”{% endif %}</h2>
+      <p>{{ businesses|length }} result{{ businesses|length|pluralize }}</p>
+      <div class="row g-3">
+        {% for business in businesses %}
+          {% include "partials/business_card.html" with business=business %}
+        {% empty %}
+          <div class="col-12">
+            <p class="home-empty-state">No businesses match those filters yet. Try another search or browse all listings.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

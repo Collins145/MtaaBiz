@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business stories and insights | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body class="mtaabiz-info-page">
+  {% include "partials/page_header.html" %}
+  <main class="container resources-page">
+    <span class="business-detail-kicker">MTAABIZ STORIES</span>
+    <h1>Ideas for local business growth</h1>
+    <p>Practical marketing, management, finance, and community stories for Kenyan businesses.</p>
+    <div class="resource-card-grid">
+      {% for article in articles %}
+        <article class="resource-card">
+          {% if article.image_url %}<img src="{{ article.image_url }}" alt="" loading="lazy">{% endif %}
+          <span>{{ article.published_at|date:"M j, Y"|default:"MtaaBiz" }}</span>
+          <h2><a href="{% url 'article_detail' article.slug %}">{{ article.title }}</a></h2>
+          <p>{{ article.summary }}</p>
+          <a href="{% url 'article_detail' article.slug %}">Read article <i class="bi bi-arrow-right"></i></a>
+        </article>
+      {% empty %}
+        <div class="owner-empty-state"><span><i class="bi bi-journal-text"></i></span><h2>New stories are on the way</h2><p>Published articles from the MtaaBiz team will appear here.</p></div>
+      {% endfor %}
+    </div>
+    <a class="owner-secondary-button" href="{% url 'business_hub' %}">Visit the Business Hub</a>
+  </main>
+  {% include "home_footer.html" %}
+</body>
+</html>

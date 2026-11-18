@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Settings | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
+</head>
+<body class="contacts-dashboard">
+  <div class="contacts-dashboard-layout">
+    {% include "partials/contact_dashboard_sidebar.html" with active_page="settings" %}
+
+    <main class="contacts-dashboard-main">
+      <header class="contacts-dashboard-topbar">
+        <div>
+          <p>MTAABIZ / PREFERENCES</p>
+          <h1>Dashboard settings</h1>
+        </div>
+        <a class="contacts-view-site" href="{% url 'show' %}"><i class="bi bi-arrow-left"></i> Back to inbox</a>
+      </header>
+
+      <section class="contacts-settings-intro">
+        <span class="contacts-settings-icon"><i class="bi bi-sliders"></i></span>
+        <div>
+          <h2>Make your inbox work for you.</h2>
+          <p>Choose how messages are displayed. Preferences are saved in this browser.</p>
+        </div>
+      </section>
+
+      <form class="contacts-settings-panel" id="dashboard-settings-form">
+        <div class="contacts-settings-panel-heading">
+          <div>
+            <h2>Inbox preferences</h2>
+            <p>These options affect the Contact inbox on this device.</p>
+          </div>
+          <span><i class="bi bi-inbox"></i></span>
+        </div>
+
+        <label class="contacts-setting-row" for="compact-inbox">
+          <span class="contacts-setting-copy">
+            <strong>Compact inbox</strong>
+            <small>Use less vertical space for each message.</small>
+          </span>
+          <input id="compact-inbox" name="compact" type="checkbox">
+        </label>
+
+        <label class="contacts-setting-row" for="message-order">
+          <span class="contacts-setting-copy">
+            <strong>Message order</strong>
+            <small>Choose which messages appear at the top of your inbox.</small>
+          </span>
+          <select id="message-order" name="order">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+        </label>
+
+        <div class="contacts-settings-actions">
+          <button class="contacts-settings-reset" id="reset-dashboard-settings" type="button">Reset to defaults</button>
+          <button class="contacts-settings-save" type="submit"><i class="bi bi-check2"></i> Save preferences</button>
+        </div>
+        <p class="contacts-settings-status" id="dashboard-settings-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <footer class="contacts-dashboard-footer">
+        <span>© {% now "Y" %} MtaaBiz</span>
+        <a href="{% url 'contact' %}">Contact support</a>
+      </footer>
+    </main>
+  </div>
+  <script src="{% static 'assets/js/contact-dashboard.js' %}" defer></script>
+</body>
+</html>

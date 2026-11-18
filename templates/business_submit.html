@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if owner_submission %}Add Your Business{% else %}List Your Business{% endif %} | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
+</head>
+<body>
+  <main class="container py-5 business-submission">
+    <a href="{% if owner_submission %}{% url 'business_dashboard' %}{% else %}{% url 'index' %}{% endif %}" class="business-back-link"><i class="bi bi-arrow-left"></i> {% if owner_submission %}Business dashboard{% else %}MtaaBiz home{% endif %}</a>
+    <h1>{% if owner_submission %}Add Your Business{% else %}List Your Business{% endif %}</h1>
+    <p>Share your details so local customers can find and contact you. Your listing will be reviewed before it is published.</p>
+    <p>Business name, category, owner, phone, email, location, description, and products or services are required. Photos, social links, opening hours, and your website are optional.</p>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-success" role="status">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="btn btn-primary" type="submit">{% if owner_submission %}Submit Business{% else %}Submit for Review{% endif %}</button>
+    </form>
+  </main>
+</body>
+</html>

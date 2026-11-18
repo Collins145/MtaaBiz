@@ -1,0 +1,45 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Customer enquiries{% endblock %}
+{% block heading %}Customer enquiries{% endblock %}
+
+{% block dashboard_content %}
+  {% include "partials/owner_business_subnav.html" with active_tab="enquiries" %}
+  <section class="owner-form-panel">
+    <div class="owner-panel-heading">
+      <div><h2>{{ business.name }} enquiries</h2><p>Track marketplace questions and follow up with customers directly.</p></div>
+    </div>
+    <div class="owner-enquiry-list">
+      {% for enquiry in enquiries %}
+        <article class="owner-enquiry">
+          <div class="owner-enquiry-header">
+            <div>
+              <span class="owner-enquiry-type">{{ enquiry.get_enquiry_type_display }} · {{ enquiry.created_at|date:"M j, Y" }}</span>
+              <h3>{{ enquiry.customer_name }}</h3>
+              <p><a href="mailto:{{ enquiry.email }}">{{ enquiry.email }}</a>{% if enquiry.phone %} · <a href="tel:{{ enquiry.phone }}">{{ enquiry.phone }}</a>{% endif %}</p>
+            </div>
+            <span class="owner-status owner-status-review">{{ enquiry.get_status_display }}</span>
+          </div>
+          <p class="owner-enquiry-listing"><i class="bi bi-box-seam"></i> {{ enquiry.listing.name }}</p>
+          <p class="owner-enquiry-message">{{ enquiry.message }}</p>
+          <form method="post" action="{% url 'owner_enquiry_update' enquiry.pk %}" class="owner-enquiry-status-form">
+            {% csrf_token %}
+            <label for="enquiry-status-{{ enquiry.pk }}">Update status</label>
+            <select id="enquiry-status-{{ enquiry.pk }}" name="status" class="form-select">
+              {% for value, label in enquiry.STATUS_CHOICES %}
+                <option value="{{ value }}"{% if enquiry.status == value %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="owner-secondary-button">Save status</button>
+          </form>
+        </article>
+      {% empty %}
+        <div class="owner-empty-state owner-empty-state-small">
+          <span><i class="bi bi-chat-dots"></i></span>
+          <h3>No enquiries yet</h3>
+          <p>Customer messages about your marketplace listings will appear here.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% load static %}
+<aside class="contacts-sidebar">
+  <a href="{% url 'index' %}" class="contacts-dashboard-logo">
+    <img src="{% static 'assets/img/MtaaBz.png' %}" alt="MtaaBiz">
+  </a>
+  <p class="contacts-sidebar-label">BUSINESS WORKSPACE</p>
+  <nav aria-label="Business dashboard navigation">
+    <a class="{% if active_page == 'overview' %}is-active{% endif %}" href="{% url 'business_dashboard' %}"{% if active_page == 'overview' %} aria-current="page"{% endif %}><i class="bi bi-grid"></i> Overview</a>
+    <a href="{% url 'add_business' %}"><i class="bi bi-plus-square"></i> Add a business</a>
+    <a href="{% url 'businesses' %}"><i class="bi bi-shop"></i> Business directory</a>
+    <a href="{% url 'marketplace' %}"><i class="bi bi-bag"></i> Marketplace</a>
+    <a href="{% url 'customer_dashboard' %}"><i class="bi bi-person-circle"></i> Customer account</a>
+    <a href="{% url 'business_hub' %}"><i class="bi bi-lightbulb"></i> Business Hub</a>
+    <a href="{% url 'blog' %}"><i class="bi bi-journal-text"></i> Blog</a>
+    <a href="{% url 'business_assistant' %}"><i class="bi bi-stars"></i> Business finder</a>
+    <a href="{% url 'claim_business' %}"><i class="bi bi-key"></i> Claim a listing</a>
+    <a href="{% url 'pricing' %}"><i class="bi bi-tags"></i> Pricing</a>
+    <a class="{% if active_page == 'settings' %}is-active{% endif %}" href="{% url 'owner_settings' %}"{% if active_page == 'settings' %} aria-current="page"{% endif %}><i class="bi bi-gear"></i> Account settings</a>
+    <a href="{% url 'index' %}"><i class="bi bi-house"></i> View website</a>
+    <form method="post" action="{% url 'logout' %}" class="owner-logout-form">
+      {% csrf_token %}
+      <button type="submit"><i class="bi bi-box-arrow-right"></i> Sign out</button>
+    </form>
+  </nav>
+  <div class="contacts-sidebar-bottom">
+    <span class="contacts-sidebar-mark"><i class="bi bi-stars"></i></span>
+    <p>Helping local<br><strong>businesses grow.</strong></p>
+  </div>
+</aside>

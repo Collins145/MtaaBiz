@@ -1,0 +1,95 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Overview{% endblock %}
+{% block heading %}Business overview{% endblock %}
+
+{% block dashboard_content %}
+  <section class="owner-dashboard-welcome">
+    <div>
+      <span>YOUR BUSINESS, YOUR WAY</span>
+      <h2>Welcome, {{ request.user.first_name|default:request.user.username }}.</h2>
+      <p>Manage your MtaaBiz listings, promotions, and customer enquiries from one place.</p>
+    </div>
+    <a href="{% url 'add_business' %}"><i class="bi bi-plus-lg"></i> Add business</a>
+  </section>
+
+  <section class="owner-stat-grid" aria-label="Business account summary">
+    <article><span class="owner-stat-icon"><i class="bi bi-shop"></i></span><div><small>Your businesses</small><strong>{{ stats.business_count|default:0 }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-blue"><i class="bi bi-box-seam"></i></span><div><small>Products and services</small><strong>{{ stats.listing_count|default:0 }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-green"><i class="bi bi-chat-dots"></i></span>    <div><small>Customer enquiries</small><strong>{{ stats.enquiry_count|default:0 }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-purple"><i class="bi bi-megaphone"></i></span><div><small>Promotions</small><strong>{{ stats.promotion_count|default:0 }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-blue"><i class="bi bi-eye"></i></span><div><small>Profile views</small><strong>{{ stats.profile_view_count|default:0 }}</strong></div></article>
+    <article><span class="owner-stat-icon owner-stat-green"><i class="bi bi-cursor"></i></span><div><small>Contact clicks</small><strong>{{ stats.contact_click_count|default:0 }}</strong></div></article>
+  </section>
+
+  <section class="owner-business-panel">
+    <div class="owner-panel-heading">
+      <div>
+        <h2>My businesses</h2>
+        <p>Update profiles and keep your listings current.</p>
+      </div>
+      <a href="{% url 'add_business' %}"><i class="bi bi-plus-lg"></i> Add a business</a>
+    </div>
+    {% for business in businesses %}
+      <article class="owner-business-card">
+        <div class="owner-business-card-top">
+          <span class="owner-business-avatar"><i class="bi bi-shop-window"></i></span>
+          <div class="owner-business-name">
+            <h3>{{ business.name }}</h3>
+            <p>{{ business.category|default:"Business listing" }} · {{ business.formatted_location }}</p>
+          </div>
+          <span class="owner-status {% if business.is_published %}owner-status-live{% else %}owner-status-review{% endif %}">
+            {% if business.is_published %}Published{% else %}Awaiting review{% endif %}
+          </span>
+        </div>
+        <div class="owner-business-metrics">
+          <span><strong>{{ business.listing_count }}</strong> products/services</span>
+          <span><strong>{{ business.enquiry_count }}</strong> enquiries</span>
+          <span><strong>{{ business.booking_count }}</strong> bookings</span>
+          <span><strong>{{ business.profile_view_count }}</strong> profile views</span>
+          <span><strong>{{ business.contact_click_count }}</strong> contact clicks</span>
+          <span><strong>{{ business.promotion_count }}</strong> promotions</span>
+          <span><strong>{% if business.review_count %}{{ business.rating|floatformat:1 }}/5{% else %}Not yet rated{% endif %}</strong></span>
+        </div>
+        <nav class="owner-business-actions" aria-label="Manage {{ business.name }}">
+          <a href="{% url 'owner_business_profile' business.pk %}"><i class="bi bi-pencil-square"></i> Edit profile</a>
+          <a href="{% url 'owner_listings' business.pk %}"><i class="bi bi-box-seam"></i> Products & services</a>
+          <a href="{% url 'owner_promotions' business.pk %}"><i class="bi bi-megaphone"></i> Promotions</a>
+          <a href="{% url 'owner_enquiries' business.pk %}"><i class="bi bi-chat-dots"></i> Enquiries</a>
+          <a href="{% url 'owner_bookings' business.pk %}"><i class="bi bi-calendar-check"></i> Bookings</a>
+          <a href="{% url 'owner_reviews' business.pk %}"><i class="bi bi-star"></i> Reviews</a>
+          <a href="{% url 'owner_analytics' business.pk %}"><i class="bi bi-graph-up"></i> Analytics</a>
+          <a href="{% url 'owner_advertisements' business.pk %}"><i class="bi bi-megaphone"></i> Advertisements</a>
+          <a href="{% url 'owner_subscriptions' business.pk %}"><i class="bi bi-credit-card"></i> Subscription</a>
+          <a href="{% url 'business_verification' %}"><i class="bi bi-patch-check"></i> Verification</a>
+        </nav>
+      </article>
+    {% empty %}
+      <div class="owner-empty-state">
+        <span><i class="bi bi-shop"></i></span>
+        <h3>Start with your first business</h3>
+        <p>Create your MtaaBiz business profile. Your listing will be reviewed before it appears publicly.</p>
+        <a href="{% url 'add_business' %}" class="owner-primary-button">List your business</a>
+        <a href="{% url 'claim_business' %}" class="owner-secondary-link">Already listed? Claim your business</a>
+      </div>
+    {% endfor %}
+  </section>
+  {% if claims %}
+    <section class="owner-form-panel owner-claims-panel">
+      <div class="owner-panel-heading">
+        <div><h2>Business claims</h2><p>Claim requests are reviewed by the MtaaBiz team.</p></div>
+      </div>
+      <div class="owner-record-list">
+        {% for claim in claims %}
+          <article class="owner-record">
+            <span class="owner-record-icon"><i class="bi bi-key"></i></span>
+            <div class="owner-record-content">
+              <strong>{{ claim.business.name }}</strong>
+              <small>Submitted {{ claim.submitted_at|date:"M j, Y" }} · {{ claim.get_status_display }}</small>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

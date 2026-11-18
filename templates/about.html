@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About MtaaBiz | Discover Local Businesses</title>
+  <meta name="description" content="Learn how MtaaBiz helps people discover local businesses, products and services in their community.">
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
+</head>
+<body class="mtaabiz-info-page">
+  {% include "partials/page_header.html" %}
+  <main>
+    <section class="info-page-hero about-page-hero">
+      <div class="container info-page-hero-grid">
+        <div class="info-page-hero-copy">
+          <span class="info-page-eyebrow">ABOUT MTAABIZ</span>
+          <h1>Local businesses deserve to be <span>easy to find.</span></h1>
+          <p>MtaaBiz brings neighborhood businesses, products and services together in one place, helping people discover what is available around them and connect directly with local sellers.</p>
+          <div class="info-page-hero-actions">
+            <a class="btn btn-primary" href="{% url 'businesses' %}">Discover businesses <i class="bi bi-arrow-right"></i></a>
+            <a class="info-page-text-link" href="{% url 'add_business' %}">List your business</a>
+          </div>
+        </div>
+        <div class="about-hero-visual" aria-hidden="true">
+          <div class="about-visual-orbit orbit-one"></div>
+          <div class="about-visual-orbit orbit-two"></div>
+          <div class="about-visual-center"><i class="bi bi-geo-alt-fill"></i></div>
+          <span class="about-visual-node node-shop"><i class="bi bi-shop"></i></span>
+          <span class="about-visual-node node-bag"><i class="bi bi-bag-heart"></i></span>
+          <span class="about-visual-node node-tools"><i class="bi bi-tools"></i></span>
+          <span class="about-visual-node node-heart"><i class="bi bi-heart-pulse"></i></span>
+          <p>Discover local.<br><strong>Connect directly.</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-purpose-section">
+      <div class="container">
+        <div class="info-section-heading">
+          <span>OUR PURPOSE</span>
+          <h2>Make local discovery simpler for everyone</h2>
+          <p>Find a nearby service, compare what local sellers offer, or help your business reach more people—MtaaBiz is a starting point for connecting with your community.</p>
+        </div>
+        <div class="row g-4 about-value-grid">
+          <div class="col-md-4">
+            <article class="about-value-card">
+              <span class="about-value-icon value-orange"><i class="bi bi-compass"></i></span>
+              <h3>Discover nearby</h3>
+              <p>Search local businesses by name, category, products, services and location.</p>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="about-value-card">
+              <span class="about-value-icon value-blue"><i class="bi bi-chat-dots"></i></span>
+              <h3>Connect directly</h3>
+              <p>Use business contact details or send a marketplace enquiry to start a conversation with a seller.</p>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="about-value-card">
+              <span class="about-value-icon value-green"><i class="bi bi-people"></i></span>
+              <h3>Support local</h3>
+              <p>Explore the businesses and services that make your neighborhood work.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-purpose-section">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <article class="about-value-card">
+              <span class="about-value-icon value-orange"><i class="bi bi-bullseye"></i></span>
+              <h3>Our mission</h3>
+              <p>{{ site_settings.mission|default:"Help people discover local businesses and make it easier for small businesses to be found, trusted, and contacted." }}</p>
+            </article>
+          </div>
+          <div class="col-md-6">
+            <article class="about-value-card">
+              <span class="about-value-icon value-blue"><i class="bi bi-eye"></i></span>
+              <h3>Our vision</h3>
+              <p>{{ site_settings.vision|default:"A thriving local economy where every community can find and support the businesses around them." }}</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-steps-section">
+      <div class="container">
+        <div class="info-section-heading">
+          <span>HOW IT WORKS</span>
+          <h2>A simple way to find what you need</h2>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <article class="about-step-card">
+              <span>01</span>
+              <i class="bi bi-search"></i>
+              <h3>Search and explore</h3>
+              <p>Browse categories or search for a business, product or service in your area.</p>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="about-step-card">
+              <span>02</span>
+              <i class="bi bi-card-list"></i>
+              <h3>Compare local options</h3>
+              <p>Review business profiles, contact information and available marketplace listings.</p>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="about-step-card">
+              <span>03</span>
+              <i class="bi bi-telephone"></i>
+              <h3>Reach out directly</h3>
+              <p>Contact a business or send an enquiry about a product or service.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-page-cta">
+      <div class="container info-page-cta-inner">
+        <div>
+          <span>GROW WITH YOUR COMMUNITY</span>
+          <h2>Have a local business?</h2>
+          <p>Create a listing and introduce your business to more nearby customers.</p>
+        </div>
+        <a class="btn btn-light" href="{% url 'add_business' %}">List Your Business <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </section>
+  </main>
+  {% include "home_footer.html" %}
+</body>
+</html>

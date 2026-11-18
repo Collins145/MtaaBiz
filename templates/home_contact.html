@@ -1,0 +1,22 @@
+<section id="contact" class="home-contact section">
+  <div class="container">
+    <div class="home-section-heading">
+      <div>
+        <h2>Contact MtaaBiz</h2>
+        <p>Questions or feedback? Send our team a message.</p>
+      </div>
+    </div>
+    <form action="{% url 'contact' %}" method="post" class="home-contact-form">
+      {% csrf_token %}
+      {% for field in contact_form %}
+        <div class="mb-3">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      {% for error in contact_form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+      <button class="btn btn-primary" type="submit">Send Message</button>
+    </form>
+  </div>
+</section>

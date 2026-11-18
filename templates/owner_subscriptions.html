@@ -1,0 +1,45 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Subscription{% endblock %}
+{% block heading %}Listing packages{% endblock %}
+
+{% block dashboard_content %}
+  {% include "partials/owner_business_subnav.html" with active_tab="subscriptions" %}
+  <section class="owner-form-panel">
+    <div class="owner-panel-heading"><div><h2>Choose a package for {{ business.name }}</h2><p>Package options and rates are managed by MtaaBiz. Requests and payments are handled manually.</p></div></div>
+    <div class="owner-pricing-grid">
+      {% for plan in plans %}
+        <article class="owner-pricing-card">
+          <span class="owner-pricing-label">{{ plan.get_billing_period_display }}</span>
+          <h3>{{ plan.name }}</h3>
+          <p class="owner-pricing-price">{% if plan.amount != None %}KSh {{ plan.amount|floatformat:2 }}{% else %}Contact us{% endif %}</p>
+          <p>{{ plan.description }}</p>
+          <form method="post">
+            {% csrf_token %}<input type="hidden" name="plan" value="{{ plan.pk }}">
+            <button class="owner-primary-button" type="submit">Request this package</button>
+          </form>
+        </article>
+      {% empty %}
+        <p class="owner-list-empty">There are no packages available yet. Contact MtaaBiz for current options.</p>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="owner-form-panel">
+    <div class="owner-panel-heading"><div><h2>Package requests</h2><p>Do not send money until you receive payment instructions from MtaaBiz.</p></div></div>
+    <div class="owner-record-list">
+      {% for subscription in requests %}
+        <article class="owner-record"><span class="owner-record-icon"><i class="bi bi-credit-card"></i></span><div class="owner-record-content"><strong>{{ subscription.plan.name }}</strong><small>{{ subscription.created_at|date:"M j, Y" }} · {{ subscription.get_status_display }}</small><small>{% if subscription.amount_due != None %}Amount due: KSh {{ subscription.amount_due|floatformat:2 }}{% else %}Amount to be confirmed{% endif %}</small>
+          {% for payment in subscription.payments.all %}<small>Payment {{ payment.reference }} · {{ payment.get_status_display }}</small>{% endfor %}
+          {% if subscription.status == 'awaiting_payment' and subscription.amount_due %}
+            <form class="manual-payment-form" method="post" action="{% url 'owner_manual_payment' 'subscription' subscription.pk %}">
+              {% csrf_token %}
+              <label for="sub-method-{{ subscription.pk }}">Payment method</label><select class="form-select" name="method" id="sub-method-{{ subscription.pk }}"><option value="mpesa">M-Pesa</option><option value="bank">Bank transfer</option><option value="other">Other</option></select>
+              <label for="sub-reference-{{ subscription.pk }}">Payment reference</label><input class="form-control" name="reference" id="sub-reference-{{ subscription.pk }}" required>
+              <button class="owner-secondary-button" type="submit">Submit for confirmation</button>
+            </form>
+          {% endif %}
+        </div></article>
+      {% empty %}<p class="owner-list-empty">You have not requested a package yet.</p>{% endfor %}
+    </div>
+  </section>
+{% endblock %}

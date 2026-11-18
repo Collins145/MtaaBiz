@@ -1,0 +1,25 @@
+{% load socialaccount %}
+<section class="owner-form-panel owner-linked-accounts">
+  <div class="owner-panel-heading">
+    <div><h2>Connected accounts</h2><p>Use a trusted account to sign in to MtaaBiz.</p></div>
+  </div>
+  {% if google_oauth_enabled %}
+    {% if google_accounts %}
+      {% for account in google_accounts %}
+        <div class="owner-linked-account">
+          <span class="owner-linked-icon"><i class="bi bi-google"></i></span>
+          <div><strong>Google connected</strong><small>{{ account.extra_data.email|default:request.user.email }}</small></div>
+        </div>
+      {% endfor %}
+      <a class="owner-linked-manage" href="{% url 'socialaccount_connections' %}">Manage connected accounts</a>
+    {% else %}
+      <p class="owner-linked-description">Connect Google for quick sign-in. You can manage or remove linked accounts here later.</p>
+      <form method="post" action="{% provider_login_url 'google' process='connect' %}">
+        {% csrf_token %}
+        <button class="owner-primary-button" type="submit"><i class="bi bi-google"></i> Connect Google</button>
+      </form>
+    {% endif %}
+  {% else %}
+    <p class="owner-linked-description">Google sign-in is not configured for this installation yet.</p>
+  {% endif %}
+</section>

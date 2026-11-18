@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketplace | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
+</head>
+<body>
+  <header class="marketplace-header">
+    <div class="container d-flex justify-content-between align-items-center">
+      <a href="{% url 'index' %}" class="business-back-link"><i class="bi bi-arrow-left"></i> MtaaBiz home</a>
+      <a class="btn btn-outline-primary" href="{% url 'add_business' %}">List your business</a>
+    </div>
+  </header>
+  <main class="container marketplace-page py-4">
+    <div class="marketplace-intro">
+      <span>SHOP LOCAL</span>
+      <h1>Products and services from businesses near you</h1>
+      <p>Discover local products, compare prices in KSh, and contact sellers directly.</p>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-success" role="status">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <details class="marketplace-filter-panel" open>
+      <summary><i class="bi bi-sliders" aria-hidden="true"></i> Search and filter listings</summary>
+      <form class="marketplace-filters" action="{% url 'marketplace' %}" method="get" role="search">
+        <div class="marketplace-filter-grid">
+          <div class="marketplace-filter-wide">
+            <label for="{{ filter_form.q.id_for_label }}">{{ filter_form.q.label }}</label>
+            {{ filter_form.q }}
+            {{ filter_form.q.errors }}
+          </div>
+          <div>
+            <label for="{{ filter_form.category.id_for_label }}">Category</label>
+            {{ filter_form.category }}
+            {{ filter_form.category.errors }}
+          </div>
+          <div>
+            <label for="{{ filter_form.listing_type.id_for_label }}">Type</label>
+            {{ filter_form.listing_type }}
+            {{ filter_form.listing_type.errors }}
+          </div>
+          <div>
+            <label for="{{ filter_form.sort.id_for_label }}">{{ filter_form.sort.label }}</label>
+            {{ filter_form.sort }}
+            {{ filter_form.sort.errors }}
+          </div>
+          <div>
+            <label for="{{ filter_form.location.id_for_label }}">{{ filter_form.location.label }}</label>
+            {{ filter_form.location }}
+            {{ filter_form.location.errors }}
+          </div>
+          <div>
+            <label for="{{ filter_form.min_price.id_for_label }}">{{ filter_form.min_price.label }}</label>
+            {{ filter_form.min_price }}
+            {{ filter_form.min_price.errors }}
+          </div>
+          <div>
+            <label for="{{ filter_form.max_price.id_for_label }}">{{ filter_form.max_price.label }}</label>
+            {{ filter_form.max_price }}
+            {{ filter_form.max_price.errors }}
+          </div>
+        </div>
+        {% if filter_form.non_field_errors %}<div class="alert alert-danger mt-3">{{ filter_form.non_field_errors }}</div>{% endif %}
+        <div class="marketplace-filter-actions">
+          <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Find listings</button>
+          <a href="{% url 'marketplace' %}">Clear filters</a>
+        </div>
+      </form>
+    </details>
+
+    <section class="marketplace-results" aria-live="polite">
+      <div class="marketplace-results-heading">
+        <div>
+          <h2>Explore the marketplace</h2>
+          <p>{{ result_count }} listing{{ result_count|pluralize }} available</p>
+        </div>
+      </div>
+      <div class="row g-4">
+        {% for listing in listings %}
+          <div class="col-sm-6 col-lg-4" id="listing-{{ listing.pk }}">
+            <article class="marketplace-card">
+              <div class="marketplace-card-image">
+                {% if listing.image_url %}
+                  <img src="{{ listing.image_url }}" alt="{{ listing.name }}" loading="lazy">
+                {% else %}
+                  <div class="marketplace-image-placeholder" aria-hidden="true"><i class="bi bi-{% if listing.listing_type == 'service' %}tools{% else %}bag{% endif %}"></i></div>
+                {% endif %}
+                <span class="marketplace-type">{{ listing.get_listing_type_display }}</span>
+              </div>
+              <div class="marketplace-card-body">
+                {% if listing.category %}<p class="marketplace-category">{{ listing.category.name }}</p>{% endif %}
+                <h3><a class="marketplace-card-title" href="{% url 'marketplace_listing_detail' listing.pk %}">{{ listing.name }}</a></h3>
+                <p class="marketplace-description">{{ listing.description|truncatewords:32 }}</p>
+                <p class="marketplace-price">
+                  {% if listing.price != None %}
+                    {% if listing.listing_type == 'service' %}From {% endif %}KSh {{ listing.price|floatformat:2 }}
+                  {% else %}
+                    <span>Request a quote</span>
+                  {% endif %}
+                </p>
+                <div class="marketplace-seller">
+                  <strong>{{ listing.business.name }}</strong>
+                  {% if listing.business.is_verified %}<span class="marketplace-verified"><i class="bi bi-patch-check-fill"></i> Verified</span>{% endif %}
+                  {% if listing.business.contact_name %}<span>Seller: {{ listing.business.contact_name }}</span>{% endif %}
+                  <span><i class="bi bi-geo-alt"></i> {{ listing.business.formatted_location }}</span>
+                  {% if listing.business.phone %}<a href="tel:{{ listing.business.phone }}"><i class="bi bi-telephone"></i> {{ listing.business.phone }}</a>{% endif %}
+                </div>
+                <a class="btn btn-primary marketplace-enquire-button" href="{% url 'marketplace_enquiry' listing.pk %}">
+                  {% if listing.listing_type == 'service' %}Enquire or request a quote{% else %}Enquire or order{% endif %}
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+                <a class="marketplace-details-link" href="{% url 'marketplace_listing_detail' listing.pk %}">View listing details</a>
+              </div>
+            </article>
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <div class="marketplace-empty">
+              <i class="bi bi-search"></i>
+              <h3>No matching listings yet</h3>
+              <p>Try changing your search or filters, or check back as local sellers add listings.</p>
+              <a href="{% url 'marketplace' %}">Browse all listings</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {% if page_obj.has_other_pages %}
+        <nav class="marketplace-pagination" aria-label="Marketplace pages">
+          {% if page_obj.has_previous %}
+            <a class="marketplace-page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous page"><i class="bi bi-chevron-left"></i> Previous</a>
+          {% else %}
+            <span class="marketplace-page-link is-disabled" aria-disabled="true"><i class="bi bi-chevron-left"></i> Previous</span>
+          {% endif %}
+          <span class="marketplace-page-status">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}
+            <a class="marketplace-page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next page">Next <i class="bi bi-chevron-right"></i></a>
+          {% else %}
+            <span class="marketplace-page-link is-disabled" aria-disabled="true">Next <i class="bi bi-chevron-right"></i></span>
+          {% endif %}
+        </nav>
+      {% endif %}
+    </section>
+  </main>
+  <script>
+    const marketplaceFilterPanel = document.querySelector(".marketplace-filter-panel");
+    if (marketplaceFilterPanel && window.matchMedia("(max-width: 767px)").matches) {
+      marketplaceFilterPanel.removeAttribute("open");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Business verification{% endblock %}
+{% block heading %}Business verification{% endblock %}
+
+{% block dashboard_content %}
+  <section class="owner-dashboard-welcome">
+    <div><span>BUILD TRUST</span><h2>Verify your business</h2><p>Share your business registration and contact details for MtaaBiz review.</p></div>
+    <span class="owner-welcome-mark"><i class="bi bi-patch-check"></i></span>
+  </section>
+  <div class="owner-management-grid">
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>Verification details</h2><p>Only businesses linked to your account can be submitted.</p></div></div>
+      {% if has_owned_businesses %}
+        <form method="post" class="owner-form owner-form-single">
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="owner-form-field">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+              {% for error in field.errors %}<small class="owner-field-error">{{ error }}</small>{% endfor %}
+            </div>
+          {% endfor %}
+          <button class="owner-primary-button" type="submit"><i class="bi bi-send"></i> Submit for review</button>
+        </form>
+      {% else %}
+        <div class="owner-empty-state owner-empty-state-small">
+          <h3>Add a business first</h3>
+          <p>Business verification is available after you register a business on your account.</p>
+          <a href="{% url 'add_business' %}" class="owner-primary-button">Add your business</a>
+        </div>
+      {% endif %}
+    </section>
+    <section class="owner-form-panel">
+      <div class="owner-panel-heading"><div><h2>Submitted requests</h2><p>Review status is updated by the MtaaBiz team.</p></div></div>
+      <div class="owner-record-list">
+        {% for request in verification_requests %}
+          <article class="owner-record">
+            <span class="owner-record-icon owner-record-icon-green"><i class="bi bi-patch-check"></i></span>
+            <div class="owner-record-content">
+              <strong>{{ request.business.name }}</strong>
+              <small>Submitted {{ request.submitted_at|date:"M j, Y" }}</small>
+              <small>{{ request.get_status_display }}</small>
+            </div>
+          </article>
+        {% empty %}
+          <p class="owner-list-empty">You have not submitted a verification request yet.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

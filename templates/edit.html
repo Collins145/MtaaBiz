@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit contact message | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
+</head>
+<body class="contacts-dashboard">
+  <div class="contacts-dashboard-layout">
+    {% include "partials/contact_dashboard_sidebar.html" with active_page="inbox" %}
+
+    <main class="contacts-dashboard-main">
+      <header class="contacts-dashboard-topbar">
+        <div>
+          <p>MTAABIZ / CONTACTS / EDIT MESSAGE</p>
+          <h1>Edit contact</h1>
+        </div>
+        <a class="contacts-view-site" href="{% url 'show' %}"><i class="bi bi-arrow-left"></i> Back to inbox</a>
+      </header>
+
+      <section class="contacts-edit-intro">
+        <span class="contacts-edit-icon"><i class="bi bi-pencil-square"></i></span>
+        <div>
+          <span>CONTACT RECORD</span>
+          <h2>Update message details</h2>
+          <p>Make changes to this contact submission and save them to your inbox.</p>
+        </div>
+      </section>
+
+      <section class="contacts-edit-panel" aria-labelledby="edit-contact-heading">
+        <div class="contacts-edit-panel-heading">
+          <div>
+            <h2 id="edit-contact-heading">Sender information</h2>
+            <p>Update the sender and message details below.</p>
+          </div>
+          <span class="contacts-edit-record"><i class="bi bi-chat-left-text"></i> Message #{{ contactinfo.id }}</span>
+        </div>
+
+        <form method="post" class="contacts-edit-form">
+          {% csrf_token %}
+          <div class="contacts-edit-fields">
+            <div class="contacts-edit-field">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" value="{{ contactinfo.name }}" autocomplete="name" required>
+            </div>
+            <div class="contacts-edit-field">
+              <label for="email">Email address</label>
+              <input type="email" id="email" name="email" value="{{ contactinfo.email }}" autocomplete="email" required>
+            </div>
+            <div class="contacts-edit-field contacts-edit-field-wide">
+              <label for="subject">Subject</label>
+              <input type="text" id="subject" name="subject" value="{{ contactinfo.subject }}" required>
+            </div>
+            <div class="contacts-edit-field contacts-edit-field-wide">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="7" required>{{ contactinfo.message }}</textarea>
+            </div>
+          </div>
+
+          <div class="contacts-edit-actions">
+            <a class="contacts-edit-cancel" href="{% url 'show' %}">Cancel</a>
+            <button type="submit" class="contacts-edit-submit"><i class="bi bi-check2"></i> Save changes</button>
+          </div>
+        </form>
+      </section>
+
+      <footer class="contacts-dashboard-footer">
+        <span>© {% now "Y" %} MtaaBiz</span>
+        <a href="{% url 'contact' %}">Contact support</a>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

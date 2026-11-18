@@ -1,0 +1,117 @@
+{% load static %}
+<section id="featured-businesses" class="home-featured section">
+  <div class="container">
+    <div class="home-section-heading">
+      <div>
+        <h2>Featured Businesses</h2>
+        <p>Top-rated and trusted businesses near you</p>
+      </div>
+      <a href="{% url 'featured_businesses' %}">View All Businesses <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="row g-3">
+      {% for business in featured_businesses %}
+        {% include "partials/business_card.html" with business=business show_full_details=True featured_card=True %}
+      {% empty %}
+        <div class="col-12">
+          <div class="home-empty-state featured-businesses-empty">
+            <i class="bi bi-shop-window" aria-hidden="true"></i>
+            <div>
+              <strong>Featured businesses will appear here</strong>
+              <p>Approved businesses selected as featured will show their photos, ratings, location, contact details, and offerings.</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="popular" class="home-featured section home-popular">
+  <div class="container">
+    <div class="home-section-heading">
+      <div>
+        <h2>Popular Businesses Near You</h2>
+        <p>Local favorites selected by the MtaaBiz team</p>
+      </div>
+      <a href="{% url 'businesses' %}">Explore Businesses <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="row g-3">
+      {% for business in popular_businesses %}
+        {% include "partials/business_card.html" with business=business %}
+      {% empty %}
+        <div class="col-12">
+          <p class="home-empty-state">Popular local businesses will appear here as listings are approved.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="promotions" class="deals-banner" aria-labelledby="promotions-heading">
+  <div class="container deals-banner-content">
+    <i class="bi bi-megaphone-fill deals-megaphone" aria-hidden="true"></i>
+    <div class="deals-copy">
+      <h2 id="promotions-heading">Latest Promotions &amp; Offers</h2>
+      {% for promotion in promotions %}
+        <article class="promotion-item">
+          <strong>{{ promotion.title }}</strong>
+          <span>{{ promotion.business.name }}</span>
+          {% if promotion.description %}<p>{{ promotion.description|truncatewords:18 }}</p>{% endif %}
+          {% if promotion.ends_on %}<small>Offer ends {{ promotion.ends_on|date:"M j, Y" }}</small>{% endif %}
+        </article>
+      {% empty %}
+        <p>No current promotions. Check back soon for local offers.</p>
+      {% endfor %}
+    </div>
+    <a href="{% url 'deals' %}" class="deals-button">View All Deals <i class="bi bi-arrow-right"></i></a>
+  </div>
+</section>
+
+<section id="about" class="home-how section">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-md-7">
+        <div class="home-section-heading home-how-heading">
+          <div>
+            <h2>How MtaaBiz Works</h2>
+            <p>Get started in just a few simple steps</p>
+          </div>
+        </div>
+        <div class="home-steps">
+          <article class="home-step">
+            <span class="home-step-number">1</span>
+            <i class="bi bi-search home-step-icon" aria-hidden="true"></i>
+            <h3>Search &amp; Discover</h3>
+            <p>Find nearby businesses, products and services.</p>
+          </article>
+          <i class="bi bi-arrow-right home-step-arrow" aria-hidden="true"></i>
+          <article class="home-step">
+            <span class="home-step-number">2</span>
+            <i class="bi bi-handshake home-step-icon" aria-hidden="true"></i>
+            <h3>Connect &amp; Engage</h3>
+            <p>Contact businesses directly about what you need.</p>
+          </article>
+          <i class="bi bi-arrow-right home-step-arrow" aria-hidden="true"></i>
+          <article class="home-step">
+            <span class="home-step-number">3</span>
+            <i class="bi bi-bar-chart-line home-step-icon" aria-hidden="true"></i>
+            <h3>Grow Together</h3>
+            <p>Support local businesses and grow your community.</p>
+          </article>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <aside class="owner-cta">
+          <div class="owner-cta-copy">
+            <h2>Are you a Business Owner?</h2>
+            <p>Submit your business for review and reach more customers.</p>
+            <a href="{% url 'add_business' %}">List Your Business <i class="bi bi-arrow-right"></i></a>
+          </div>
+          <img src="{% static 'assets/img/person/person-m-12.webp' %}" alt="Local business owner">
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>

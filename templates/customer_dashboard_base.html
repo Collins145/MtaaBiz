@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Customer account{% endblock %} | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body class="contacts-dashboard owner-dashboard">
+  <div class="contacts-dashboard-layout">
+    <aside class="contacts-sidebar">
+      <a href="{% url 'index' %}" class="contacts-dashboard-logo"><img src="{% static 'assets/img/MtaaBz.png' %}" alt="MtaaBiz"></a>
+      <p class="contacts-sidebar-label">CUSTOMER ACCOUNT</p>
+      <nav aria-label="Customer account navigation">
+        <a href="{% url 'customer_dashboard' %}"><i class="bi bi-grid"></i> My activity</a>
+        <a href="{% url 'businesses' %}"><i class="bi bi-shop"></i> Find businesses</a>
+        <a href="{% url 'nearby_businesses' %}"><i class="bi bi-geo-alt"></i> Nearby</a>
+        <a href="{% url 'marketplace' %}"><i class="bi bi-bag"></i> Marketplace</a>
+        <a href="{% url 'customer_settings' %}"><i class="bi bi-gear"></i> Account settings</a>
+        {% if request.user.businesses.exists %}<a href="{% url 'business_dashboard' %}"><i class="bi bi-speedometer2"></i> Business workspace</a>{% endif %}
+        <a href="{% url 'index' %}"><i class="bi bi-house"></i> View website</a>
+        <form method="post" action="{% url 'logout' %}" class="owner-logout-form">{% csrf_token %}<button type="submit"><i class="bi bi-box-arrow-right"></i> Sign out</button></form>
+      </nav>
+    </aside>
+    <main class="contacts-dashboard-main">
+      <header class="contacts-dashboard-topbar">
+        <div><p>MTAABIZ / CUSTOMER ACCOUNT</p><h1>{% block heading %}My account{% endblock %}</h1></div>
+        <a class="contacts-view-site" href="{% url 'businesses' %}"><i class="bi bi-search"></i> Discover businesses</a>
+      </header>
+      {% if messages %}<div class="owner-dashboard-messages" role="status">{% for message in messages %}<p class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %}">{{ message }}</p>{% endfor %}</div>{% endif %}
+      {% block account_content %}{% endblock %}
+      <footer class="contacts-dashboard-footer"><span>© {% now "Y" %} MtaaBiz</span><a href="{% url 'contact' %}">Contact support</a></footer>
+    </main>
+  </div>
+</body>
+</html>

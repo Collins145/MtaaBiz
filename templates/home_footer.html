@@ -1,0 +1,67 @@
+{% load static %}
+  <footer id="footer" class="home-footer">
+    <div class="container">
+      {% if messages %}
+        <div class="home-footer-messages" role="status">
+          {% for message in messages %}
+            <p class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %}">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="row gy-4 home-footer-main">
+        <div class="col-12 col-md-3">
+          <a href="{% url 'index' %}#hero" class="home-footer-logo" aria-label="MtaaBiz home">
+            <img src="{% static 'assets/img/MtaaBz.png' %}" alt="MtaaBiz">
+          </a>
+        </div>
+        <div class="col-6 col-md-2">
+          <h2>Quick Links</h2>
+          <ul>
+            <li><a href="{% url 'index' %}#hero">Home</a></li>
+            <li><a href="{% url 'businesses' %}">Businesses</a></li>
+            <li><a href="{% url 'deals' %}">Offers</a></li>
+            <li><a href="{% url 'about' %}">About MtaaBiz</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
+            <li><a href="{% url 'pricing' %}">Pricing</a></li>
+            <li><a href="{% url 'business_hub' %}">Business Hub</a></li>
+            <li><a href="{% url 'blog' %}">Blog</a></li>
+            {% if user.is_authenticated %}
+              <li><a href="{% url 'customer_dashboard' %}">My account</a></li>
+            {% else %}
+              <li><a href="{% url 'login' %}">Sign in</a></li>
+            {% endif %}
+          </ul>
+        </div>
+        <div class="col-6 col-md-2">
+          <h2>Follow Us</h2>
+          <div class="home-footer-social">
+            <a href="https://www.instagram.com/" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+              <i class="bi bi-instagram" aria-hidden="true"></i>
+            </a>
+            <a href="https://www.facebook.com/" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+              <i class="bi bi-facebook" aria-hidden="true"></i>
+            </a>
+            <a href="https://www.linkedin.com/" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
+              <i class="bi bi-linkedin" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-12 col-md-5">
+          <h2>Subscribe to our Newsletter</h2>
+          <p>Get the latest business updates and offers.</p>
+          <form class="home-newsletter" action="{% url 'newsletter_subscribe' %}" method="post">
+            {% csrf_token %}
+            <label class="visually-hidden" for="newsletter-email">Your email address</label>
+            <input id="newsletter-email" name="email" type="email" placeholder="Your email address" autocomplete="email" required>
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <div class="home-footer-bottom">
+        <p>© {% now "Y" %} MtaaBiz. All rights reserved.</p>
+        <nav aria-label="Legal links">
+          <a href="{% url 'contact' %}">Contact support</a>
+        </nav>
+      </div>
+    </div>
+  </footer>

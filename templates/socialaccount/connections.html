@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connected accounts | MtaaBiz</title>
+  {% load static socialaccount %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body class="account-page">
+  {% include "partials/page_header.html" %}
+  <main class="account-page-main">
+    <section class="account-card account-connections-card">
+      <a class="account-back-link" href="{% if request.user.businesses.exists %}{% url 'owner_settings' %}{% else %}{% url 'customer_settings' %}{% endif %}"><i class="bi bi-arrow-left"></i> Back to account settings</a>
+      <span class="account-card-icon"><i class="bi bi-shield-check"></i></span>
+      <p class="account-eyebrow">ACCOUNT SECURITY</p>
+      <h1>Connected accounts</h1>
+      <p class="account-intro">Connect a trusted provider to sign in, or remove a provider you no longer use.</p>
+
+      {% if form.non_field_errors %}
+        <div class="account-form-errors" role="alert">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      {% if form.accounts %}
+        <form method="post" class="account-connected-form" action="{% url 'socialaccount_connections' %}">
+          {% csrf_token %}
+          {% for acc in form.fields.account.choices %}
+            {% with provider_account=acc.0.instance.get_provider_account %}
+              <label class="account-connected-option" for="connected-account-{{ provider_account.account.pk }}">
+                <input id="connected-account-{{ provider_account.account.pk }}" type="radio" name="account" value="{{ provider_account.account.pk }}" required>
+                <span class="account-connected-provider"><i class="bi bi-google"></i></span>
+                <span><strong>{{ provider_account }}</strong><small>{{ provider_account.get_brand.name }}</small></span>
+              </label>
+            {% endwith %}
+          {% endfor %}
+          <button class="account-disconnect-button" type="submit"><i class="bi bi-link-45deg"></i> Disconnect selected account</button>
+        </form>
+      {% else %}
+        <p class="account-no-connections">No third-party accounts are currently connected.</p>
+      {% endif %}
+
+      {% get_social_accounts request.user as connected_social_accounts %}
+      {% if google_oauth_enabled %}
+        {% if not connected_social_accounts.google %}
+          <form method="post" class="account-social-form" action="{% provider_login_url 'google' process='connect' %}">
+            {% csrf_token %}
+            <button class="account-google-button" type="submit"><i class="bi bi-google"></i> Connect Google</button>
+          </form>
+        {% endif %}
+      {% else %}
+        <p class="account-oauth-note">Google sign-in is not configured for this installation yet.</p>
+      {% endif %}
+    </section>
+  </main>
+  {% include "home_footer.html" %}
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Customer reviews{% endblock %}
+{% block heading %}Customer reviews{% endblock %}
+
+{% block dashboard_content %}
+  {% include "partials/owner_business_subnav.html" with active_tab="reviews" %}
+  <section class="owner-form-panel">
+    <div class="owner-panel-heading"><div><h2>{{ business.name }} reviews</h2><p>Only reviews approved by MtaaBiz are public. Respond to published reviews here.</p></div></div>
+    <div class="owner-enquiry-list">
+      {% for review in reviews %}
+        <article class="owner-enquiry">
+          <div class="owner-enquiry-header"><div><span class="owner-enquiry-type">{{ review.created_at|date:"M j, Y" }} · {{ review.rating }}/5 stars</span><h3>{{ review.title }}</h3><p>{{ review.customer.get_full_name|default:review.customer.username }}</p></div><span class="owner-status {% if review.is_approved %}owner-status-live{% else %}owner-status-review{% endif %}">{% if review.is_approved %}Published{% else %}Awaiting moderation{% endif %}</span></div>
+          <p class="owner-enquiry-message">{{ review.body|linebreaksbr }}</p>
+          {% if review.is_approved %}
+            <form class="owner-form owner-form-single" method="post" action="{% url 'owner_review_reply' review.pk %}">
+              {% csrf_token %}
+              <div class="owner-form-field"><label for="reply-{{ review.pk }}">Business response</label><textarea class="form-control" id="reply-{{ review.pk }}" name="owner_response" rows="3">{{ review.owner_response }}</textarea></div>
+              <button class="owner-secondary-button" type="submit">Save response</button>
+            </form>
+          {% endif %}
+        </article>
+      {% empty %}
+        <div class="owner-empty-state owner-empty-state-small"><span><i class="bi bi-star"></i></span><h3>No reviews yet</h3><p>Customer reviews will appear here after MtaaBiz moderation.</p></div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

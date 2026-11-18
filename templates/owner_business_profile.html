@@ -1,0 +1,33 @@
+{% extends "owner_dashboard_base.html" %}
+
+{% block title %}Edit {{ business.name }}{% endblock %}
+{% block heading %}My business profile{% endblock %}
+
+{% block dashboard_content %}
+  {% include "partials/owner_business_subnav.html" with active_tab="profile" %}
+  <section class="owner-form-panel">
+    <div class="owner-panel-heading">
+      <div>
+        <h2>Business details</h2>
+        <p>Keep your public profile accurate and easy for customers to find.</p>
+      </div>
+      {% if business.is_published %}<span class="owner-status owner-status-live">Published</span>{% else %}<span class="owner-status owner-status-review">Awaiting review</span>{% endif %}
+    </div>
+    <form method="post" class="owner-form">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="owner-form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <div class="owner-form-field{% if field.field.widget.input_type == 'textarea' %} owner-form-field-wide{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+          {% for error in field.errors %}<small class="owner-field-error">{{ error }}</small>{% endfor %}
+        </div>
+      {% endfor %}
+      <div class="owner-form-actions owner-form-field-wide">
+        <a class="owner-cancel-button" href="{% url 'business_dashboard' %}">Cancel</a>
+        <button class="owner-primary-button" type="submit"><i class="bi bi-check2"></i> Save profile</button>
+      </div>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Business dashboard{% endblock %} | MtaaBiz</title>
+  {% load static %}
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+<body class="contacts-dashboard owner-dashboard">
+  <div class="contacts-dashboard-layout">
+    {% include "partials/owner_dashboard_sidebar.html" with active_page=active_page|default:"overview" %}
+    <main class="contacts-dashboard-main">
+      <header class="contacts-dashboard-topbar">
+        <div>
+          <p>MT AABIZ / BUSINESS WORKSPACE</p>
+          <h1>{% block heading %}Business dashboard{% endblock %}</h1>
+        </div>
+        <a class="contacts-view-site" href="{% url 'index' %}"><i class="bi bi-box-arrow-up-right"></i> View website</a>
+      </header>
+      {% if messages %}
+        <div class="owner-dashboard-messages" role="status">
+          {% for message in messages %}
+            <p class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %}">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block dashboard_content %}{% endblock %}
+      <footer class="contacts-dashboard-footer">
+        <span>© {% now "Y" %} MtaaBiz</span>
+        <a href="{% url 'contact' %}">Contact support</a>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
