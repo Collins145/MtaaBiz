@@ -1,0 +1,28 @@
+# Ruff configuration — linting + formatting for MtaaBiz
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # bugbear (common bug patterns)
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",   # line too long (templates/django style lines)
+    "B008",   # function call in default arg (Django idiomatic)
+    "RUF012", # mutable class attrs are Django Meta/widgets idiomatic
+    "N999",   # Django project package name is capitalized by convention
+    "UP031",  # legacy % formatting in tests
+    "BLE001", # broad exception catches are intentional (health check, upload validation)
+    "FLY002", # join is fine
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["myapp", "MtaaBiz"]
+
+[tool.ruff.format]
+quote-style = "double"

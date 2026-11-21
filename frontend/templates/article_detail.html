@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ article.title }} | MtaaBiz</title>
   <meta name="description" content="{{ article.summary }}">
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="MtaaBiz">
+  <meta property="og:title" content="{{ article.title }}">
+  <meta property="og:description" content="{{ article.summary }}">
+  {% if article.image_url %}<meta property="og:image" content="{{ article.image_url }}">{% endif %}
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ request.scheme }}://{{ request.get_host }}/"},
+      {% if article.content_type == 'resource' %}
+      {"@type": "ListItem", "position": 2, "name": "Business Hub", "item": "{{ request.scheme }}://{{ request.get_host }}/business-hub/"},
+      {"@type": "ListItem", "position": 3, "name": "{{ article.title|escapejs }}", "item": "{{ request.build_absolute_uri }}"}
+      {% else %}
+      {"@type": "ListItem", "position": 2, "name": "Blog", "item": "{{ request.scheme }}://{{ request.get_host }}/blog/"},
+      {"@type": "ListItem", "position": 3, "name": "{{ article.title|escapejs }}", "item": "{{ request.build_absolute_uri }}"}
+      {% endif %}
+    ]
+  }
+  </script>
   {% load static %}
   <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
   <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">

@@ -11,34 +11,34 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .admin import BusinessReviewAdmin, ManualPaymentAdmin
-from .notifications import notify_user
 from .models import (
     AdvertisementCampaign,
+    Business,
+    BusinessClaim,
     BusinessEvent,
     BusinessReport,
     BusinessReview,
-    Business,
-    BusinessClaim,
     BusinessVerificationRequest,
     Category,
     Contact,
-    MarketplaceCategory,
-    MarketplaceEnquiry,
-    MarketplaceListing,
+    ContentArticle,
     FavoriteBusiness,
     ListingPlan,
     ManualPayment,
+    MarketplaceCategory,
+    MarketplaceEnquiry,
+    MarketplaceListing,
     NewsletterSubscription,
     Promotion,
     RecentlyViewedBusiness,
     ServiceBooking,
     SubscriptionRequest,
+    Testimonial,
     UserLoginEvent,
     UserNotification,
     UserNotificationPreference,
-    ContentArticle,
-    Testimonial,
 )
+from .notifications import notify_user
 
 
 class HomeDirectoryTests(TestCase):
@@ -1027,7 +1027,7 @@ class PlatformGrowthWorkflowTests(TestCase):
 
     def test_customer_account_saves_business_activity_reviews_and_reports(self):
         self.client.force_login(self.customer)
-        detail_url = reverse("business_detail", args=[self.business.pk])
+        detail_url = reverse("business_detail_by_slug", args=[self.business.pk, self.business.slug])
         self.assertEqual(self.client.get(detail_url).status_code, 200)
         self.client.post(reverse("toggle_business_favorite", args=[self.business.pk]))
         response = self.client.post(
@@ -1079,7 +1079,7 @@ class PlatformGrowthWorkflowTests(TestCase):
             reverse("service_booking", args=[self.service.pk]),
             {"appointment_at": appointment, "message": "After 3 pm if possible."},
         )
-        self.assertRedirects(response, reverse("business_detail", args=[self.business.pk]))
+        self.assertRedirects(response, reverse("business_detail", args=[self.business.pk]), target_status_code=301)
         booking = ServiceBooking.objects.get()
         self.assertEqual(booking.customer, self.customer)
         self.assertTrue(UserNotification.objects.filter(user=self.owner, message__icontains="booking").exists())

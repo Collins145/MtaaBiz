@@ -18,6 +18,7 @@
           <p>MT AABIZ / BUSINESS WORKSPACE</p>
           <h1>{% block heading %}Business dashboard{% endblock %}</h1>
         </div>
+        {% if request.user.businesses.exists %}<a class="contacts-view-site" href="{% url 'customer_dashboard' %}"><i class="bi bi-person-circle"></i> Switch to customer account</a>{% endif %}
         <a class="contacts-view-site" href="{% url 'index' %}"><i class="bi bi-box-arrow-up-right"></i> View website</a>
       </header>
       {% if messages %}

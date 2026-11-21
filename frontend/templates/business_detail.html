@@ -5,6 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ business.name }} | MtaaBiz</title>
   <meta name="description" content="{{ business.description|truncatewords:24 }}">
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  <meta property="og:type" content="business.business">
+  <meta property="og:site_name" content="MtaaBiz">
+  <meta property="og:title" content="{{ business.name }}">
+  <meta property="og:description" content="{{ business.description|truncatewords:24 }}">
+  {% if business.cover_image %}<meta property="og:image" content="{{ request.build_absolute_uri }}{{ business.cover_image.url }}">
+  {% elif business.cover_image_url %}<meta property="og:image" content="{{ business.cover_image_url }}">
+  {% elif business.image_url %}<meta property="og:image" content="{{ business.image_url }}">{% endif %}
+  <meta name="twitter:card" content="summary_large_image">
+  {% if business.latitude and business.longitude %}
+  <meta name="geo.position" content="{{ business.latitude }};{{ business.longitude }}">
+  {% endif %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "{{ business.name|escapejs }}",
+    "description": "{{ business.description|truncatechars:300|escapejs }}",
+    "telephone": "{{ business.phone }}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ business.physical_address }}",
+      "addressLocality": "{{ business.town }}",
+      "addressRegion": "{{ business.county }}",
+      "addressCountry": "KE"
+    }
+    {% if business.rating %},"aggregateRating": {"@type": "AggregateRating", "ratingValue": "{{ business.rating }}", "reviewCount": {{ business.review_count }}}{% endif %}
+  }
+  </script>
   {% load static %}
   <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
   <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
@@ -16,13 +45,17 @@
     {% if messages %}{% for message in messages %}<p class="alert alert-info" role="status">{{ message }}</p>{% endfor %}{% endif %}
     <a class="business-back-link" href="{% url 'businesses' %}"><i class="bi bi-arrow-left"></i> Business directory</a>
     <section class="business-detail-hero">
-      {% if business.cover_image_url or business.image_url %}
+      {% if business.cover_image %}
+        <img src="{{ business.cover_image.url }}" alt="{{ business.name }} cover">
+      {% elif business.cover_image_url or business.image_url %}
         <img src="{{ business.cover_image_url|default:business.image_url }}" alt="{{ business.name }} cover">
       {% endif %}
       <div>
         <span class="business-detail-kicker">{% if business.category %}{{ business.category.name }}{% else %}Local business{% endif %}</span>
         <h1>{{ business.name }}{% if business.is_verified %} <span class="business-verified"><i class="bi bi-patch-check-fill"></i> Verified</span>{% endif %}</h1>
         <p><i class="bi bi-geo-alt"></i> {{ business.formatted_location }}</p>
+        {% if business.is_open_now %}<p class="badge bg-success-subtle text-success-emphasis"><i class="bi bi-clock-fill"></i> Open now</p>
+        {% elif business.is_open_now == False %}<p class="badge bg-secondary-subtle text-secondary-emphasis"><i class="bi bi-clock"></i> Closed now</p>{% endif %}
         {% if business.rating %}<p><i class="bi bi-star-fill"></i> {{ business.rating|floatformat:1 }} / 5 · {{ business.review_count }} approved reviews</p>{% else %}<p>Not yet rated</p>{% endif %}
         {% if user.is_authenticated %}
           <form method="post" action="{% url 'toggle_business_favorite' business.pk %}">
@@ -110,10 +143,30 @@
         {% endif %}
         {% if business.email %}<p><i class="bi bi-envelope"></i> <a href="{% url 'track_business_contact' business.pk 'email' %}">{{ business.email }}</a></p>{% endif %}
         {% if business.website_url %}<p><i class="bi bi-globe"></i> <a href="{% url 'track_business_contact' business.pk 'website' %}">Visit website</a></p>{% endif %}
+        <a class="owner-secondary-button" target="_blank" rel="noopener noreferrer"
+           href="https://wa.me/?text={{ business.name|urlencode }}%20%E2%80%94%20{{ request.build_absolute_uri|urlencode }}"
+           aria-label="Share {{ business.name }} on WhatsApp">
+          <i class="bi bi-share"></i> Share on WhatsApp
+        </a>
         {% if business.facebook_url %}<a href="{{ business.facebook_url }}" target="_blank" rel="noopener noreferrer">Facebook</a>{% endif %}
         {% if business.instagram_url %}<a href="{{ business.instagram_url }}" target="_blank" rel="noopener noreferrer">Instagram</a>{% endif %}
       </aside>
     </div>
+
+    {% if business.latitude and business.longitude %}
+    <section class="business-detail-panel">
+      <h2>Find us on the map</h2>
+      <iframe
+        title="Map showing {{ business.name }}"
+        width="100%"
+        height="300"
+        style="border:0; border-radius: 12px;"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q={{ business.latitude }},{{ business.longitude }}&z=15&output=embed">
+      </iframe>
+    </section>
+    {% endif %}
     {% if user.is_authenticated and business.owner_id != user.pk %}
       <section id="report-business" class="business-detail-panel business-report-panel">
         <h2>Report this listing</h2>

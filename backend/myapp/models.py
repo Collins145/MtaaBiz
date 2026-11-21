@@ -1,7 +1,16 @@
+import json
+import re
+
 from django.conf import settings
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
+
+from .validators import ImageUploadValidator
+
+business_image_validator = ImageUploadValidator()
 
 # Create your models here.
 class Contact(models.Model):
@@ -31,6 +40,7 @@ class Category(models.Model):
 
 class Business(models.Model):
     name = models.CharField(max_length=120)
+    slug = models.SlugField(max_length=150, unique=True, blank=True, allow_unicode=False)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -62,12 +72,27 @@ class Business(models.Model):
         blank=True,
         validators=(MinValueValidator(-180), MaxValueValidator(180)),
     )
-    opening_hours = models.TextField(blank=True)
+    opening_hours = models.TextField(
+        blank=True,
+        help_text=(
+            "Structured weekly hours as JSON, e.g. {\"mon\": \"08:00-17:00\", ...}. "
+            "Free-text hours go into description instead."
+        ),
+    )
     location = models.CharField(max_length=120)
     phone = models.CharField(max_length=30, blank=True)
     image_url = models.URLField(max_length=500, blank=True)
     logo_url = models.URLField(max_length=500, blank=True)
     cover_image_url = models.URLField(max_length=500, blank=True)
+    image = models.ImageField(
+        upload_to="business/images/", blank=True, null=True, validators=(business_image_validator,)
+    )
+    logo = models.ImageField(
+        upload_to="business/logos/", blank=True, null=True, validators=(business_image_validator,)
+    )
+    cover_image = models.ImageField(
+        upload_to="business/covers/", blank=True, null=True, validators=(business_image_validator,)
+    )
     contact_name = models.CharField(max_length=120, blank=True)
     email = models.EmailField(blank=True)
     website_url = models.URLField(max_length=500, blank=True)
@@ -76,7 +101,7 @@ class Business(models.Model):
     tiktok_url = models.URLField(max_length=500, blank=True)
     x_url = models.URLField(max_length=500, blank=True)
     linkedin_url = models.URLField(max_length=500, blank=True)
-    rating = models.DecimalField(max_digits=2, decimal_places=1, default=0)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=0)
     review_count = models.PositiveIntegerField(default=0)
     is_verified = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)
@@ -86,9 +111,67 @@ class Business(models.Model):
 
     class Meta:
         ordering = ("-is_featured", "-rating", "name")
+        indexes = [
+            models.Index(fields=("is_published", "is_featured")),
+            models.Index(fields=("is_published", "category")),
+            models.Index(fields=("is_published", "county")),
+            models.Index(fields=("is_published", "town")),
+            models.Index(fields=("is_published", "-rating")),
+            models.Index(fields=("slug",)),
+            models.Index(fields=("-created_at",)),
+        ]
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = slugify(self.name)[:140] or "business"
+            slug = base
+            counter = 2
+            while Business.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("business_detail_by_slug", args=[self.pk, self.slug])
+
+    @property
+    def opening_hours_dict(self):
+        """Parse the structured opening-hours JSON into a dict keyed by weekday."""
+        raw = (self.opening_hours or "").strip()
+        if not raw:
+            return {}
+        try:
+            data = json.loads(raw)
+            return {str(k).lower()[:3]: str(v) for k, v in data.items() if v}
+        except (ValueError, TypeError):
+            return {}
+
+    @property
+    def is_open_now(self):
+        """Best-effort check of today's hours, e.g. '08:00-17:00' or 'open' / 'closed'."""
+        hours = self.opening_hours_dict
+        today = timezone.localdate().strftime("%a").lower()[:3]
+        entry = hours.get(today)
+        if not entry:
+            return None
+        entry = entry.strip().lower()
+        if entry in ("closed", "no"):
+            return False
+        if entry in ("open", "24h", "24/7"):
+            return True
+        match = re.match(r"^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$", entry)
+        if not match:
+            return None
+        now = timezone.localtime().time()
+        import datetime as _dt
+
+        start = _dt.time(int(match.group(1)), int(match.group(2)))
+        end = _dt.time(int(match.group(3)), int(match.group(4)))
+        return start <= now <= end
 
     @property
     def formatted_location(self):
@@ -430,6 +513,7 @@ class BusinessReview(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
+        indexes = [models.Index(fields=("business", "is_approved", "-created_at"))]
         constraints = [
             models.UniqueConstraint(fields=("business", "customer"), name="unique_customer_business_review")
         ]
@@ -525,9 +609,16 @@ class ContentArticle(models.Model):
     is_published = models.BooleanField(default=False)
     published_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    meta_description = models.CharField(
+        max_length=300, blank=True, help_text="SEO meta description; falls back to summary."
+    )
 
     class Meta:
         ordering = ("-published_at", "-created_at")
+        indexes = [
+            models.Index(fields=("content_type", "is_published")),
+            models.Index(fields=("slug",)),
+        ]
 
     def __str__(self):
         return self.title
@@ -624,6 +715,11 @@ class AdvertisementCampaign(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
+        indexes = [
+            models.Index(fields=("status", "-created_at")),
+            models.Index(fields=("placement", "status")),
+            models.Index(fields=("starts_on", "ends_on")),
+        ]
 
     def __str__(self):
         return f"{self.title} · {self.business.name}"

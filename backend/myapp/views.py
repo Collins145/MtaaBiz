@@ -4,21 +4,23 @@ import re
 from datetime import timedelta
 
 from allauth.socialaccount.models import SocialAccount
+from django.conf import settings as django_settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import (
     AuthenticationForm,
     PasswordChangeForm,
     SetPasswordForm,
 )
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.admin.views.decorators import staff_member_required
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.db.models import Count, Exists, F, OuterRef, Q, Sum
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -26,25 +28,25 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from .forms import (
-    AdvertisementCampaignForm,
     AccountRegistrationForm,
+    AdvertisementCampaignForm,
     BookingStatusForm,
+    BusinessClaimForm,
+    BusinessReportForm,
     BusinessReviewForm,
     BusinessReviewResponseForm,
     BusinessSubmissionForm,
-    BusinessClaimForm,
     BusinessVerificationForm,
     ContactForm,
-    BusinessReportForm,
     EnquiryStatusForm,
+    ManualPaymentSubmissionForm,
     MarketplaceEnquiryForm,
     MarketplaceFilterForm,
     MarketplaceListingForm,
-    ManualPaymentSubmissionForm,
     NewsletterForm,
+    NotificationPreferenceForm,
     OwnerAccountForm,
     OwnerPromotionForm,
-    NotificationPreferenceForm,
     ServiceBookingForm,
 )
 from .models import (
@@ -57,8 +59,8 @@ from .models import (
     BusinessReview,
     BusinessVerificationRequest,
     Category,
-    ContentArticle,
     Contact,
+    ContentArticle,
     FavoriteBusiness,
     ListingPlan,
     ManualPayment,
@@ -78,8 +80,35 @@ from .models import (
 )
 from .notifications import notify_user
 from .reviews import refresh_business_rating
+from .search import search_businesses
 
 # Create your views here.
+
+def healthz(request):
+    """Lightweight liveness/readiness probe for uptime monitors and reverse proxies."""
+    from django.db import connections
+
+    status = {"status": "ok", "database": "ok"}
+    try:
+        with connections["default"].cursor():
+            pass
+    except Exception:
+        status = {"status": "degraded", "database": "error"}
+        return JsonResponse(status, status=503)
+    return JsonResponse(status)
+
+
+def robots_txt(request):
+    """Serve robots.txt pointing crawlers at the sitemap."""
+    lines = [
+        "User-agent: *",
+        "Disallow: /admin/",
+        "Disallow: /dashboard/",
+        "Disallow: /account/",
+        "Allow: /",
+        f"Sitemap: {getattr(django_settings, 'SITE_BASE_URL', '')}/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
 
 def error(request):
     return render(request, '404.html', status=404)
@@ -130,6 +159,15 @@ def starter(request):
     return render(request, 'starter-page.html')
 
 def _home_context():
+    # The homepage context is cached to avoid re-running the ads/featured
+    # queries on every request; the cache is skipped while testing so each
+    # test case sees fresh database state.
+    cache_key = "home_context_data"
+    if not getattr(django_settings, "TESTING", False):
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
     categories = Category.objects.filter(is_active=True)
     today = timezone.localdate()
     active_home_campaigns = AdvertisementCampaign.objects.filter(
@@ -141,21 +179,27 @@ def _home_context():
         Q(ends_on__isnull=True) | Q(ends_on__gte=today),
     )
 
-    return {
-        "categories": categories,
-        "hero_categories": categories[:7],
-        "more_categories": categories[7:],
-        "featured_businesses": Business.objects.filter(is_published=True)
-        .annotate(is_sponsored=Exists(active_home_campaigns))
-        .filter(Q(is_featured=True) | Q(is_sponsored=True))
-        .select_related("category")
-        .order_by("-is_sponsored", "-is_featured", "-rating", "name")[:4],
-        "popular_businesses": Business.objects.filter(
-            is_published=True, is_popular=True
-        ).select_related("category")[:4],
-        "promotions": _current_promotions()[:3],
-        "testimonials": Testimonial.objects.filter(is_published=True)[:8],
+    context = {
+        "categories": list(categories),
+        "hero_categories": list(categories[:7]),
+        "more_categories": list(categories[7:]),
+        "featured_businesses": list(
+            Business.objects.filter(is_published=True)
+            .annotate(is_sponsored=Exists(active_home_campaigns))
+            .filter(Q(is_featured=True) | Q(is_sponsored=True))
+            .select_related("category")
+            .order_by("-is_sponsored", "-is_featured", "-rating", "name")[:4]
+        ),
+        "popular_businesses": list(
+            Business.objects.filter(is_published=True, is_popular=True)
+            .select_related("category")[:4]
+        ),
+        "promotions": list(_current_promotions()[:3]),
+        "testimonials": list(Testimonial.objects.filter(is_published=True)[:8]),
     }
+    if not getattr(django_settings, "TESTING", False):
+        cache.set(cache_key, context, getattr(django_settings, "CACHE_TTL_SHORT", 60))
+    return context
 
 
 def index(request):
@@ -199,14 +243,10 @@ def businesses(request):
     query = request.GET.get("q", "").strip()
     category_slug = request.GET.get("category", "").strip()
     location = request.GET.get("location", "").strip()
+    page_number = request.GET.get("page", "1")
 
     if query:
-        results = results.filter(
-            Q(name__icontains=query)
-            | Q(description__icontains=query)
-            | Q(offerings__icontains=query)
-            | Q(category__name__icontains=query)
-        )
+        results = search_businesses(results, query)
     if category_slug:
         results = results.filter(category__slug=category_slug)
     if location:
@@ -220,11 +260,18 @@ def businesses(request):
     results = results.annotate(is_sponsored=Exists(active_directory_campaigns)).order_by(
         "-is_sponsored", "-is_featured", "-rating", "name"
     )
+
+    # Pagination: 12 results per page
+    paginator = Paginator(results, 12)
+    page_obj = paginator.get_page(page_number)
+
     return render(
         request,
         "businesses.html",
         {
-            "businesses": results,
+            "businesses": page_obj.object_list,
+            "page_obj": page_obj,
+            "paginator": paginator,
             "categories": Category.objects.filter(is_active=True),
             "query": query,
             "selected_category": category_slug,
@@ -333,12 +380,18 @@ def nearby_businesses(request):
     )
 
 
-def business_detail(request, business_id):
+def business_detail(request, business_id, slug=None):
     business = get_object_or_404(
         Business.objects.select_related("category"),
         pk=business_id,
         is_published=True,
     )
+    # Canonical URL is the slug version; redirect older numeric-only links for SEO.
+    if slug is None:
+        from django.urls import reverse as _reverse
+        return redirect(_reverse("business_detail_by_slug", args=[business.pk, business.slug]), permanent=True)
+    if slug and slug != business.slug:
+        return redirect(business.get_absolute_url(), permanent=True)
     if not request.user.is_authenticated or business.owner_id != request.user.pk:
         BusinessEvent.objects.create(
             business=business,
@@ -663,7 +716,21 @@ def submit_business(request):
     return render(request, "business_submit.html", {"form": form})
 
 
-def _safe_account_redirect(request, fallback="business_dashboard"):
+def _owns_business(user):
+    return Business.objects.filter(owner=user).exists()
+
+
+def _account_home(user):
+    """Pick the default dashboard: business owners get the business
+    workspace, everyone else the customer hub."""
+    if user.is_superuser:
+        return "admin_reports"
+    if _owns_business(user):
+        return "business_dashboard"
+    return "customer_dashboard"
+
+
+def _safe_account_redirect(request, fallback=None):
     next_url = request.POST.get("next") or request.GET.get("next", "")
     if next_url and url_has_allowed_host_and_scheme(
         next_url,
@@ -671,7 +738,7 @@ def _safe_account_redirect(request, fallback="business_dashboard"):
         require_https=request.is_secure(),
     ):
         return redirect(next_url)
-    return redirect(fallback)
+    return redirect(fallback or _account_home(request.user))
 
 
 def _account_password_form(user, data=None):
@@ -679,13 +746,13 @@ def _account_password_form(user, data=None):
     return form_class(user, data)
 
 
-def _notify_user(user, message, url):
-    return notify_user(user, message, url)
+def _notify_user(user, message, url, email_subject=None):
+    return notify_user(user, message, url, email_subject=email_subject)
 
 
 def register(request):
     if request.user.is_authenticated:
-        return redirect("business_dashboard")
+        return redirect(_account_home(request.user))
     form = AccountRegistrationForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -699,7 +766,7 @@ def register(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect("admin_reports" if request.user.is_superuser else "business_dashboard")
+        return redirect(_account_home(request.user))
     form = AuthenticationForm(request, data=request.POST or None)
     next_url = request.POST.get("next") or request.GET.get("next", "")
     if request.method == "POST" and form.is_valid():
@@ -711,8 +778,6 @@ def login_view(request):
             ip_address=request.META.get("REMOTE_ADDR") or None,
             user_agent=(request.META.get("HTTP_USER_AGENT") or "")[:300],
         )
-        if not next_url and user.is_superuser:
-            return redirect("admin_reports")
         return _safe_account_redirect(request)
     return render(request, "login.html", {"form": form, "next": next_url})
 

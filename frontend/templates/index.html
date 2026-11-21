@@ -4,16 +4,23 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>MtaaBiz</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
+  <title>{% block page_title %}MtaaBiz — Discover local businesses near you{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}MtaaBiz connects customers to trusted businesses, deals and services around their area in Kenya.{% endblock %}">
+  <meta name="keywords" content="Kenya business directory, local businesses, mtaa, MtaaBiz">
+  {% block social_meta %}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MtaaBiz">
+  <meta property="og:title" content="MtaaBiz — Discover local businesses near you">
+  <meta property="og:description" content="Connect with trusted businesses, deals and services around your area.">
+  <meta name="twitter:card" content="summary_large_image">
+  {% endblock %}
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
   {% load static %}
 
   <!-- Favicons -->
-  <link rel="icon" href="{% static 'assets/img/MtaaBz.png' %}" />
-  <!-- <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
-  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon"> -->
+  <link rel="icon" type="image/png" href="{% static 'assets/img/MtaaBz.png' %}" />
+  <link rel="apple-touch-icon" href="{% static 'assets/img/MtaaBz.png' %}" />
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">

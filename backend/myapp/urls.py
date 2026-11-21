@@ -1,5 +1,6 @@
 
 from django.urls import path
+
 from myapp import views
 
 urlpatterns = [
@@ -23,6 +24,7 @@ urlpatterns = [
     path('businesses/', views.businesses, name='businesses'),
     path('businesses/featured/', views.featured_businesses, name='featured_businesses'),
     path('businesses/<int:business_id>/', views.business_detail, name='business_detail'),
+    path('businesses/<int:business_id>-<str:slug>/', views.business_detail, name='business_detail_by_slug'),
     path('businesses/<int:business_id>/favorite/', views.toggle_business_favorite, name='toggle_business_favorite'),
     path('businesses/<int:business_id>/review/', views.business_review, name='business_review'),
     path('businesses/<int:business_id>/report/', views.business_report, name='business_report'),

@@ -28,6 +28,7 @@
     <main class="contacts-dashboard-main">
       <header class="contacts-dashboard-topbar">
         <div><p>MTAABIZ / CUSTOMER ACCOUNT</p><h1>{% block heading %}My account{% endblock %}</h1></div>
+        {% if request.user.businesses.exists %}<a class="contacts-view-site" href="{% url 'business_dashboard' %}"><i class="bi bi-speedometer2"></i> Switch to business workspace</a>{% endif %}
         <a class="contacts-view-site" href="{% url 'businesses' %}"><i class="bi bi-search"></i> Discover businesses</a>
       </header>
       {% if messages %}<div class="owner-dashboard-messages" role="status">{% for message in messages %}<p class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %}">{{ message }}</p>{% endfor %}</div>{% endif %}
